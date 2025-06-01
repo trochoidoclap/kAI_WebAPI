@@ -18,7 +18,7 @@ namespace kAI_webAPI.Controllers
 
         [HttpPost]
         [Route("/Users/Create")]
-        public IActionResult ThemUser(string name, string password, string fullname, string email, int phone, string address) // Added 'email' parameter
+        public IActionResult ThemUser(string name, string password, string fullname, string email, string phone, string address) // Added 'email' parameter
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(email)) // Validate 'email'
             {
@@ -41,7 +41,7 @@ namespace kAI_webAPI.Controllers
         }
         [HttpPost]
         [Route("/Users/Update")]
-        public IActionResult CapnhatUser(string name, string password, string fullname, string email, int phone, string address) // Added 'email' parameter
+        public IActionResult CapnhatUser(string name, string password, string fullname, string email, string phone, string address) // Added 'email' parameter
         {
             var user = new Models.Users
             {

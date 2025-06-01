@@ -13,7 +13,9 @@ namespace kAI_webAPI.Models
         public string Fullname { get; set; } = string.Empty;
         [StringLength(50)]
         public string Email { get; set; } = string.Empty;
-        public int Phone { get; set; }
+        [StringLength(50)]
+        public string Phone { get; set; } = string.Empty;
+        [StringLength(50)]
         public string Address { get; set; } = string.Empty;
     }
 }
