@@ -74,5 +74,11 @@ namespace kAI_webAPI.Controllers
             _context.SaveChanges();
             return Ok("User deleted successfully.");
         }
+        [HttpGet]
+        public IActionResult GetUsers()
+        {
+            var users = _context.Users.ToList();
+            return Ok(users);
+        }
     }
 }
