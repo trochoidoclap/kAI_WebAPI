@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection; // Ensure this is included
-using kAI_webAPI.Models;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using kAI_webAPI.Models.User;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +15,7 @@ IConfiguration cf = new ConfigurationBuilder()
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Sử dụng MySQL provider
-builder.Services.AddDbContext<Userscontext>(options =>
+builder.Services.AddDbContext<Usercontext>(options =>
     options.UseMySql(
         connString,
         new MySqlServerVersion(new Version(8, 0, 40)) 
