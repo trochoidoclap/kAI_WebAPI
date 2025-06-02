@@ -2,13 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using kAI_webAPI.Models.User;
+using kAI_webAPI.Models.Question;
 
 #nullable disable
 
 namespace kAI_webAPI.Migrations
 {
-    [DbContext(typeof(Usercontext))]
+    [DbContext(typeof(Questioncontext))]
     partial class UserscontextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
