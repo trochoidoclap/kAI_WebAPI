@@ -1,9 +1,11 @@
 ﻿using kAI_webAPI.Dtos.User;
+using kAI_webAPI.Interfaces;
 using kAI_webAPI.Mappers;
 using kAI_webAPI.Models.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,14 +16,16 @@ namespace kAI_webAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly Usercontext _context;
+        private readonly IUserRepository _userRepo;
 
-        public UsersController(Usercontext context)
+        public UsersController(Usercontext context, IUserRepository userRepo)
         {
             _context = context;
+            _userRepo = userRepo;
         }
         [HttpPost]
         [Route("/Users/Create")]
-        public IActionResult ThemUser([FromBody] CreateUserRequestDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
+        public async Task<IActionResult> ThemUser([FromBody] CreateUserRequestDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
         {
             if (userDto == null)
             {
@@ -33,53 +37,55 @@ namespace kAI_webAPI.Controllers
                 return BadRequest("Username, Password, and Fullname are required.");
             }
             var userModel = userDto.ToUserFromCreateDto();
-            _context.Users.Add(userModel);
-            _context.SaveChanges();
+            await _userRepo.AddUserSync(userModel);
             return Ok("User created successfully.");
         }
         [HttpPut]
         [Route("/Users/Update/{id_user}")]
-        public IActionResult CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
+        public async Task<IActionResult> CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
         {
-            var userModel = _context.Users.FirstOrDefault(u => u.Id_users == id_user);
-
-            if (userModel == null)
-            {
-                return NotFound("User not found.");
-            }
-            userModel.Username = updateDto.Username;
-            userModel.Password = updateDto.Password;
-            userModel.Fullname = updateDto.Fullname;
-            userModel.Email = updateDto.Email;
-            userModel.Phone = updateDto.Phone;
-            userModel.Address = updateDto.Address;
-
-            _context.SaveChanges();
+            await _userRepo.UpdateUserSync(id_user, updateDto);
             return Ok("User updated successfully.");
         }
 
         [HttpPost]
         [Route("/Users/Delete")]
-        public IActionResult XoaUser(int id_user)
+        public async Task<IActionResult> XoaUser(int id_user)
         {
             if (id_user <= 0)
             {
                 return BadRequest("Invalid user ID.");
             }
-            var user = _context.Users.Find(id_user);
+            await _userRepo.DeleteUserSync(id_user);
+            return Ok("User deleted successfully.");
+        }
+        [HttpGet]
+        [Route("/Users/GetAll")]
+        public async Task<IActionResult> LayTatCaUsers()
+        {
+            var users = await _userRepo.GetAllUserSync();
+            if (users == null) // Ensure 'users' is not null before calling Select
+            {
+                return NotFound("No users found.");
+            }
+            var userDtos = users.Select(s => s.ToUserDto());
+            return Ok(userDtos);
+        }
+        [HttpGet]
+        [Route("/Users/GetById/{id_user}")]
+        public async Task<IActionResult> LayUserbyId_User(int id_user)
+        {
+            if (id_user <= 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+            var user = await _userRepo.GetUserByIdSync(id_user);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-            return Ok("User deleted successfully.");
-        }
-        [HttpGet]
-        public IActionResult GetUsers()
-        {
-            var users = _context.Users.ToList().Select(s => s.ToUserDto());
-            return Ok(users);
+            var userDto = user.ToUserDto();
+            return Ok(userDto);
         }
     }
 }

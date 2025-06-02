@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection; // Ensure this is included
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using kAI_webAPI.Models.User;
 using kAI_webAPI.Models.Question;
+using kAI_webAPI.Interfaces;
+using kAI_webAPI.Repository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,10 +24,19 @@ builder.Services.AddDbContext<Questioncontext>(options =>
         new MySqlServerVersion(new Version(8, 0, 40)) 
     ));
 
+builder.Services.AddDbContext<Usercontext>(options =>
+    options.UseMySql(
+        connString,
+        new MySqlServerVersion(new Version(8, 0, 40))
+    ));
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register Usercontext and UserRepository
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
