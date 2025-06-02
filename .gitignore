@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /kAI_webAPI/kAI_webAPI/appsettings.json
+/kAI_webAPI/kAI_webAPI/appsettings.json
