@@ -37,6 +37,7 @@ builder.Services.AddSwaggerGen();
 
 // Register Usercontext and UserRepository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IQuestionsRepository, QuestionsRepository>();
 
 var app = builder.Build();
 

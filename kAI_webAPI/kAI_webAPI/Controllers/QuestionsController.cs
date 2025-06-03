@@ -1,4 +1,8 @@
-﻿using kAI_webAPI.Models.Question;
+﻿using kAI_webAPI.Dtos.Questions;
+using kAI_webAPI.Interfaces;
+using kAI_webAPI.Mappers;
+using kAI_webAPI.Models.Question;
+using kAI_webAPI.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,16 +14,19 @@ namespace kAI_webAPI.Controllers
     public class QuestionsController : ControllerBase
     {
         private readonly Questioncontext _context;
-        public QuestionsController(Questioncontext context)
+        private readonly IQuestionsRepository _questionsRepo;
+        public QuestionsController(Questioncontext context, IQuestionsRepository questionsRepo)
         {
             _context = context;
+            _questionsRepo = questionsRepo;
         }
         [HttpGet]
-        [Route("/Questions/GetAll")]
+        [Route("/Questions/GetAllQuestions")]
         public async Task<IActionResult> GetAllQuestions()
         {
-            var questions = await _context.Questions.ToListAsync();
-            return Ok(questions);
-        }       
+            var questions = await _questionsRepo.GetAllQuestionsAsync();
+            var questionsDtos = questions.Select(s => s.ToGetQuestionsDto());
+            return Ok(questionsDtos);
+        }
     }
 }

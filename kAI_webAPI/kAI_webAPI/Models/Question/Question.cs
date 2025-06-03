@@ -8,7 +8,9 @@ namespace kAI_webAPI.Models.Question
         public int Id_questype { get; set; }
 
         [StringLength(15)]
-        public string questype { get; set; } = string.Empty;
+        public string Questype { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
+        public string Comment_vn { get; set; } = string.Empty;
 
         public ICollection<Question> Questions { get; set; } = new List<Question>();
     }
@@ -21,7 +23,5 @@ namespace kAI_webAPI.Models.Question
         public Questions_type? QuestionsType { get; set; }
         public string Content { get; set; } = string.Empty;
         public int Score { get; set; }
-
-        
     }
 }
