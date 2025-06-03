@@ -7,10 +7,10 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.ComponentModel.DataAnnotations;
 namespace kAI_webAPI.Controllers
 {
-    public class GetQuestion : ControllerBase
+    public class QuestionsController : ControllerBase
     {
         private readonly Questioncontext _context;
-        public GetQuestion(Questioncontext context)
+        public QuestionsController(Questioncontext context)
         {
             _context = context;
         }

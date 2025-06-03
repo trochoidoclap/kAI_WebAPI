@@ -41,7 +41,7 @@ namespace kAI_webAPI.Controllers
             return Ok("User created successfully.");
         }
         [HttpPut]
-        [Route("/Users/Update/{id_user}")]
+        [Route("/Users/Update/{id_user:int}")]
         public async Task<IActionResult> CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
         {
             await _userRepo.UpdateUserSync(id_user, updateDto);
@@ -72,7 +72,7 @@ namespace kAI_webAPI.Controllers
             return Ok(userDtos);
         }
         [HttpGet]
-        [Route("/Users/GetById/{id_user}")]
+        [Route("/Users/GetById/{id_user:int}")]
         public async Task<IActionResult> LayUserbyId_User(int id_user)
         {
             if (id_user <= 0)
