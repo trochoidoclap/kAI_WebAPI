@@ -27,7 +27,7 @@ namespace kAI_webAPI.Controllers
         }
         [HttpPost]
         [Route("/Users/Create")]
-        public async Task<IActionResult> ThemUser([FromBody] CreateUserRequestDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
+        public async Task<IActionResult> ThemUser([FromBody] UserRegisterDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
         {
             if (userDto == null)
             {

@@ -13,7 +13,6 @@ namespace kAI_webAPI.Data
         { } 
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Question> Questions { get; set; } = null!;
-        public DbSet<Subjects_type> Subjects_types { get; set; } = null!;
         public DbSet<Subjects> Subjects { get; set; } = null!;
         public DbSet<Subjects_group> Subjects_groups { get; set; } = null!;
 

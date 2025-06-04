@@ -1,6 +1,7 @@
 ﻿using kAI_webAPI.Data;
 using kAI_webAPI.Dtos.Subjects;
 using kAI_webAPI.Models.Subjects;
+using kAI_webAPI.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,53 +33,53 @@ namespace kAI_webAPI.Controllers
             if (groupEntity == null)
                 return NotFound("Group not found.");
 
-            var dto = new SubjectsGroupDTOs
+            var dto = new SubjectsGroupDto
             {
-                Subjects = new List<SubjectsDTOs>()
+                Subjects = new List<SubjectsDto>()
             };
 
             if (groupEntity.Subjects1 != null)
             {
-                dto.Subjects.Add(new SubjectsDTOs
+                dto.Subjects.Add(new SubjectsDto // Corrected the type name
                 {
                     Subject = groupEntity.Subjects1.Subject,
-                    Type = groupEntity.Subjects1.Type ?? string.Empty 
+                    Type = groupEntity.Subjects1.Type ?? string.Empty
                 });
             }
 
             if (groupEntity.Subjects2 != null)
             {
-                dto.Subjects.Add(new SubjectsDTOs
+                dto.Subjects.Add(new SubjectsDto // Corrected the type name
                 {
                     Subject = groupEntity.Subjects2.Subject,
-                    Type = groupEntity.Subjects2.Type ?? string.Empty 
+                    Type = groupEntity.Subjects2.Type ?? string.Empty
                 });
             }
 
             if (groupEntity.Subjects3 != null)
             {
-                dto.Subjects.Add(new SubjectsDTOs
+                dto.Subjects.Add(new SubjectsDto // Corrected the type name
                 {
                     Subject = groupEntity.Subjects3.Subject,
-                    Type = groupEntity.Subjects3.Type ?? string.Empty 
+                    Type = groupEntity.Subjects3.Type ?? string.Empty
                 });
             }
 
             if (groupEntity.Subjects4 != null)
             {
-                dto.Subjects.Add(new SubjectsDTOs
+                dto.Subjects.Add(new SubjectsDto // Corrected the type name
                 {
                     Subject = groupEntity.Subjects4.Subject!,
-                    Type = groupEntity.Subjects4.Type ?? string.Empty 
+                    Type = groupEntity.Subjects4.Type ?? string.Empty
                 });
             }
 
             if (groupEntity.Subjects5 != null)
             {
-                dto.Subjects.Add(new SubjectsDTOs
+                dto.Subjects.Add(new SubjectsDto // Corrected the type name
                 {
                     Subject = groupEntity.Subjects5.Subject!,
-                    Type = groupEntity.Subjects5.Type ?? string.Empty 
+                    Type = groupEntity.Subjects5.Type ?? string.Empty
                 });
             }
 

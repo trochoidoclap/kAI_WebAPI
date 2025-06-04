@@ -22,7 +22,7 @@ namespace kAI_webAPI.Mappers
                 Address = userModel.Address
             };
         }
-        public static User ToUserFromCreateDto(this CreateUserRequestDto userDto)
+        public static User ToUserFromCreateDto(this UserRegisterDto userDto)
         {
             return new User
             {

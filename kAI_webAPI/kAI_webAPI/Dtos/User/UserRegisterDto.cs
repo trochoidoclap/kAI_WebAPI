@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace kAI_webAPI.Dtos.User
 {
-    public class CreateUserRequestDto
+    public class UserRegisterDto
     {
         // Ko cần khai báo Id_users trong DTO tạo mới người dùng
         public string Username { get; set; } = string.Empty;

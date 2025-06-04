@@ -4,14 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 namespace kAI_webAPI.Dtos.Subjects
 {
-    public class SubjectsDTOs
+    public class SubjectsDto
     {
         public string Subject { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
     }
-    public class SubjectsGroupDTOs
+    public class SubjectsGroupDto
     {
 
-        public List<SubjectsDTOs> Subjects { get; set; } = new List<SubjectsDTOs>();
+        public List<SubjectsDto> Subjects { get; set; } = new List<SubjectsDto>();
     }
 }
