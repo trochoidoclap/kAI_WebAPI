@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection; // Ensure this is included
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using kAI_webAPI.Models.User;
 using kAI_webAPI.Models.Question;
+using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Repository;
 
@@ -18,6 +19,11 @@ IConfiguration cf = new ConfigurationBuilder()
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Sử dụng MySQL provider
+builder.Services.AddDbContext<Subjectscontext>(options =>
+    options.UseMySql(
+        connString,
+        new MySqlServerVersion(new Version(8, 0, 40)) 
+    ));
 builder.Services.AddDbContext<Questioncontext>(options =>
     options.UseMySql(
         connString,
