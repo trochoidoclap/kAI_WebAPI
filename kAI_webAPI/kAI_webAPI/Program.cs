@@ -1,8 +1,8 @@
 ﻿using kAI_webAPI.Data;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Models.Question;
-using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.User;
+using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection; // Ensure this is included
 using Microsoft.IdentityModel.Tokens;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using kAI_webAPI.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +44,26 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IQuestionsRepository, QuestionsRepository>();
 
+builder.Services.Configure<AppSetting>(cf.GetSection("AppSettings"));
+
+var secretKey = cf["AppSettings:SecretKey"];
+var secretKeyBytes = System.Text.Encoding.UTF8.GetBytes(secretKey ?? throw new InvalidOperationException("SecretKey is not configured."));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        // Xác thực token bằng chữ ký
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+        // Tự cấp phát hành token, không cần xác thực nhà phát hành và người nhận
+        ValidateIssuer = false,
+        ValidateAudience = false,
+
+        ClockSkew = TimeSpan.Zero // Optional: Set to zero to avoid clock skew issues
+    };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -52,6 +74,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

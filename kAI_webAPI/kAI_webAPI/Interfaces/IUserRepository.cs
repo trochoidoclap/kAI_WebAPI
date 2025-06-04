@@ -11,6 +11,7 @@ namespace kAI_webAPI.Interfaces
     public interface IUserRepository
     {
         Task<User?> AddUserSync(User userModel);
+        Task<User?> LoginUserSync(UserLoginDto userLoginDto);
         Task<User?> UpdateUserSync(int id_user, UpdateUserRequestDto updateDto);
         Task<User?> DeleteUserSync(int id_user);
         Task<List<User>?> GetAllUserSync(QueryObject query);

@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using kAI_webAPI.Helpers;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using kAI_webAPI.Data;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace kAI_webAPI.Repository
@@ -28,7 +29,15 @@ namespace kAI_webAPI.Repository
             await _context.SaveChangesAsync();
             return userModel;
         }
-
+        public async Task<User?> LoginUserSync(UserLoginDto userLoginDto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLoginDto.Username && u.Password == userLoginDto.Password);
+            if (user == null)
+            {
+                return null;
+            }
+            return user;
+        }
         public async Task<User?> DeleteUserSync(int id_user)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id_users == id_user);
@@ -56,9 +65,9 @@ namespace kAI_webAPI.Repository
             {
                 users = users.Where(u => u.Email.ToLower().Contains(query.Email.ToLower()));
             }
-            if (query.Phone.HasValue)
+            if (!string.IsNullOrEmpty(query.Phone))
             {
-                users = users.Where(u => u.Phone == query.Phone.Value);
+                users = users.Where(u => u.Phone.Contains(query.Phone));
             }
             if (!string.IsNullOrEmpty(query.Address))
             {
