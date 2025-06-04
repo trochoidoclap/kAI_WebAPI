@@ -19,7 +19,6 @@ namespace kAI_webAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Subjects_type>().ToTable("subjects_type");
             modelBuilder.Entity<Subjects>().ToTable("subjects");
             modelBuilder.Entity<Subjects_group>().ToTable("subjects_group");
         }

@@ -2,25 +2,15 @@
 using System.ComponentModel.DataAnnotations.Schema;
 namespace kAI_webAPI.Models.Subjects
 {
-    public class Subjects_type
-    {
-        [Key]
-        public int Id_subtype { get; set; }
-        [StringLength(50)]
-        public string Subtype { get; set; } = string.Empty;
 
-        public ICollection<Subjects> Subjects { get; set; } = new List<Subjects>();
-    }
     public class Subjects
     {
         [Key]
         public int Id_subjects { get; set; }
-        public int Type { get; set; }
-        [ForeignKey(nameof(Type))]
-        public Subjects_type? SubjectsType { get; set; }
         [StringLength(50)]
         public string Subject { get; set; } = string.Empty;
-
+        [StringLength(50)]
+        public string? Type { get; set; } = string.Empty;
     }
     public class Subjects_group
     {
