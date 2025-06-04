@@ -20,33 +20,28 @@ namespace kAI_webAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetGroupById(int id)
         {
-
             var groupEntity = await _context.Subjects_groups
                 .Include(g => g.Subjects1)
-                    .ThenInclude(s => s!.SubjectsType)
                 .Include(g => g.Subjects2)
-                    .ThenInclude(s => s!.SubjectsType)
                 .Include(g => g.Subjects3)
-                    .ThenInclude(s => s!.SubjectsType)
                 .Include(g => g.Subjects4)
-                    .ThenInclude(s => s!.SubjectsType)
                 .Include(g => g.Subjects5)
-                    .ThenInclude(s => s!.SubjectsType)
                 .FirstOrDefaultAsync(g => g.Id_subgroup == id);
 
             if (groupEntity == null)
                 return NotFound("Group not found.");
 
-
-            var dto = new SubjectsGroupDTOs();
-
+            var dto = new SubjectsGroupDTOs
+            {
+                Subjects = new List<SubjectsDTOs>()
+            };
 
             if (groupEntity.Subjects1 != null)
             {
                 dto.Subjects.Add(new SubjectsDTOs
                 {
                     Subject = groupEntity.Subjects1.Subject,
-                    Subtype = groupEntity.Subjects1.SubjectsType!.Subtype
+                    Type = groupEntity.Subjects1.Type ?? string.Empty 
                 });
             }
 
@@ -55,7 +50,7 @@ namespace kAI_webAPI.Controllers
                 dto.Subjects.Add(new SubjectsDTOs
                 {
                     Subject = groupEntity.Subjects2.Subject,
-                    Subtype = groupEntity.Subjects2.SubjectsType!.Subtype
+                    Type = groupEntity.Subjects2.Type ?? string.Empty 
                 });
             }
 
@@ -64,7 +59,7 @@ namespace kAI_webAPI.Controllers
                 dto.Subjects.Add(new SubjectsDTOs
                 {
                     Subject = groupEntity.Subjects3.Subject,
-                    Subtype = groupEntity.Subjects3.SubjectsType!.Subtype
+                    Type = groupEntity.Subjects3.Type ?? string.Empty 
                 });
             }
 
@@ -73,7 +68,7 @@ namespace kAI_webAPI.Controllers
                 dto.Subjects.Add(new SubjectsDTOs
                 {
                     Subject = groupEntity.Subjects4.Subject!,
-                    Subtype = groupEntity.Subjects4.SubjectsType!.Subtype
+                    Type = groupEntity.Subjects4.Type ?? string.Empty 
                 });
             }
 
@@ -82,7 +77,7 @@ namespace kAI_webAPI.Controllers
                 dto.Subjects.Add(new SubjectsDTOs
                 {
                     Subject = groupEntity.Subjects5.Subject!,
-                    Subtype = groupEntity.Subjects5.SubjectsType!.Subtype
+                    Type = groupEntity.Subjects5.Type ?? string.Empty 
                 });
             }
 
