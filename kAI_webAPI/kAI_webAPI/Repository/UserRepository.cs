@@ -7,14 +7,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using kAI_webAPI.Helpers;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using kAI_webAPI.Data;
 
 
 namespace kAI_webAPI.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Usercontext _context; // Ensure 'DataContext' is defined in the 'kAI_webAPI.Data' namespace
-        public UserRepository(Usercontext context)
+        private readonly ApplicationDBContext _context; // Ensure 'DataContext' is defined in the 'kAI_webAPI.Data' namespace
+        public UserRepository(ApplicationDBContext context)
         {
             _context = context;
         }
@@ -38,14 +41,48 @@ namespace kAI_webAPI.Repository
             return user;
         }
 
-        public async Task<List<User>?> GetAllUserSync()
+        public async Task<List<User>?> GetAllUserSync(QueryObject query)
         {
-            var users = await _context.Users.ToListAsync();
-            if (users == null || users.Count == 0)
+            var users = _context.Users.AsQueryable();
+            if (!string.IsNullOrEmpty(query.Username))
             {
-                return null;
+                users = users.Where(u => u.Username.ToLower().Contains(query.Username.ToLower()));
             }
-            return users;
+            if (!string.IsNullOrEmpty(query.Fullname))
+            {
+                users = users.Where(u => u.Fullname.ToLower().Contains(query.Fullname.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(query.Email))
+            {
+                users = users.Where(u => u.Email.ToLower().Contains(query.Email.ToLower()));
+            }
+            if (query.Phone.HasValue)
+            {
+                users = users.Where(u => u.Phone == query.Phone.Value);
+            }
+            if (!string.IsNullOrEmpty(query.Address))
+            {
+                users = users.Where(u => u.Address.ToLower().Contains(query.Address.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                switch (query.SortBy.ToLower())
+                {
+                    case "username":
+                        users = query.IsDescending ? users.OrderByDescending(u => u.Username) : users.OrderBy(u => u.Username);
+                        break;
+                    case "fullname":
+                        users = query.IsDescending ? users.OrderByDescending(u => u.Fullname) : users.OrderBy(u => u.Fullname);
+                        break;
+                    case "address":
+                        users = query.IsDescending ? users.OrderByDescending(u => u.Address) : users.OrderBy(u => u.Address);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            return await users.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<User?> GetUserByIdSync(int id_user)

@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using kAI_webAPI.Models.Question;
+using kAI_webAPI.Data;
 
 #nullable disable
 
 namespace kAI_webAPI.Migrations
 {
-    [DbContext(typeof(Questioncontext))]
+    [DbContext(typeof(ApplicationDBContext))]
     [Migration("20250601144804_InitialCreate")]
     partial class InitialCreate
     {

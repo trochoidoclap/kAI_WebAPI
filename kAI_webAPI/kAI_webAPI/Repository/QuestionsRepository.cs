@@ -1,4 +1,5 @@
-﻿using kAI_webAPI.Interfaces;
+﻿using kAI_webAPI.Data;
+using kAI_webAPI.Interfaces;
 using kAI_webAPI.Models.Question;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,9 +11,9 @@ namespace kAI_webAPI.Repository
 {
     public class QuestionsRepository : IQuestionsRepository
     {
-        private readonly Questioncontext _context;
+        private readonly ApplicationDBContext _context;
 
-        public QuestionsRepository(Questioncontext context)
+        public QuestionsRepository(ApplicationDBContext context)
         {
             _context = context;
         }

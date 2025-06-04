@@ -1,4 +1,6 @@
-﻿using kAI_webAPI.Dtos.User;
+﻿using kAI_webAPI.Data;
+using kAI_webAPI.Dtos.User;
+using kAI_webAPI.Helpers;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Mappers;
 using kAI_webAPI.Models.User;
@@ -15,10 +17,10 @@ namespace kAI_webAPI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly Usercontext _context;
+        private readonly ApplicationDBContext _context;
         private readonly IUserRepository _userRepo;
 
-        public UsersController(Usercontext context, IUserRepository userRepo)
+        public UsersController(ApplicationDBContext context, IUserRepository userRepo)
         {
             _context = context;
             _userRepo = userRepo;
@@ -61,10 +63,10 @@ namespace kAI_webAPI.Controllers
         }
         [HttpGet]
         [Route("/Users/GetAll")]
-        public async Task<IActionResult> LayTatCaUsers()
+        public async Task<IActionResult> LayTatCaUsers([FromQuery] QueryObject query)
         {
-            var users = await _userRepo.GetAllUserSync();
-            if (users == null) // Ensure 'users' is not null before calling Select
+            var users = await _userRepo.GetAllUserSync(query);
+            if (users == null)
             {
                 return NotFound("No users found.");
             }

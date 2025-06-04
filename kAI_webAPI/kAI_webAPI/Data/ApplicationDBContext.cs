@@ -1,15 +1,22 @@
 ﻿using kAI_webAPI.Models.Subjects;
+using kAI_webAPI.Models.User;
+using kAI_webAPI.Models.Question;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-namespace kAI_webAPI.Models.Subjects
+
+namespace kAI_webAPI.Data
 {
-    public class Subjectscontext : DbContext
+    public class ApplicationDBContext : DbContext
     {
-        public Subjectscontext(DbContextOptions<Subjectscontext> options) : base(options)
-        {
-        }
+        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> dbContextOptions)
+            : base(dbContextOptions)
+        { } 
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Question> Questions { get; set; } = null!;
         public DbSet<Subjects_type> Subjects_types { get; set; } = null!;
         public DbSet<Subjects> Subjects { get; set; } = null!;
         public DbSet<Subjects_group> Subjects_groups { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Subjects_type>().ToTable("subjects_type");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using kAI_webAPI.Dtos.User;
+using kAI_webAPI.Helpers;
 using kAI_webAPI.Models.User;
 
 namespace kAI_webAPI.Interfaces
@@ -12,7 +13,7 @@ namespace kAI_webAPI.Interfaces
         Task<User?> AddUserSync(User userModel);
         Task<User?> UpdateUserSync(int id_user, UpdateUserRequestDto updateDto);
         Task<User?> DeleteUserSync(int id_user);
-        Task<List<User>?> GetAllUserSync();
+        Task<List<User>?> GetAllUserSync(QueryObject query);
         Task<User?> GetUserByIdSync(int id_user);
     }
 }

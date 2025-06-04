@@ -1,4 +1,5 @@
-﻿using kAI_webAPI.Dtos.Questions;
+﻿using kAI_webAPI.Data;
+using kAI_webAPI.Dtos.Questions;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Mappers;
 using kAI_webAPI.Models.Question;
@@ -13,9 +14,9 @@ namespace kAI_webAPI.Controllers
 {
     public class QuestionsController : ControllerBase
     {
-        private readonly Questioncontext _context;
+        private readonly ApplicationDBContext _context;
         private readonly IQuestionsRepository _questionsRepo;
-        public QuestionsController(Questioncontext context, IQuestionsRepository questionsRepo)
+        public QuestionsController(ApplicationDBContext context, IQuestionsRepository questionsRepo)
         {
             _context = context;
             _questionsRepo = questionsRepo;

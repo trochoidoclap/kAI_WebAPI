@@ -1,4 +1,5 @@
-﻿using kAI_webAPI.Dtos.Subjects;
+﻿using kAI_webAPI.Data;
+using kAI_webAPI.Dtos.Subjects;
 using kAI_webAPI.Models.Subjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,9 @@ namespace kAI_webAPI.Controllers
     [Route("api/[controller]")]
     public class SubjectsGroupController : ControllerBase
     {
-        private readonly Subjectscontext _context;
+        private readonly ApplicationDBContext _context;
 
-        public SubjectsGroupController(Subjectscontext context)
+        public SubjectsGroupController(ApplicationDBContext context)
         {
             _context = context;
         }
