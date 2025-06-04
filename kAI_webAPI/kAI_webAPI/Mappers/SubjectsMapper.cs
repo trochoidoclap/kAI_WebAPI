@@ -3,9 +3,9 @@
 namespace kAI_webAPI.Mappers
 {
     public static class SubjectsMapper
-    {
-        public static SubjectsDto ToGetSubjectsDto(this SubjectsDto subjectsModel)
         {
+        public static SubjectsDto ToGetSubjectsDto(this SubjectsDto subjectsModel)
+            {
             return new SubjectsDto
             {
                 Subject = subjectsModel.Subject,
