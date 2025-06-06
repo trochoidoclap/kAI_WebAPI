@@ -7,7 +7,7 @@ namespace kAI_webAPI.Interfaces
 {
     public interface ITranscriptRepository
     {
-        Task AddTranscriptAsync(Transcript transcript);
-        Task<Transcript> GetTranscript(int id);
+        Task<Transcript?> AddTranscriptAsync(Transcript transcript);
+        Task<Transcript?> GetTranscript(int id);
     }
 }

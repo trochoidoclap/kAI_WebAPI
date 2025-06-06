@@ -17,7 +17,7 @@ namespace kAI_webAPI.Data
         public DbSet<Questions_type> QuestionsTypes { get; set; } = null!;
         public DbSet<Subjects> Subjects { get; set; } = null!;
         public DbSet<SubjectsGroup> SubjectsGroups { get; set; } = null!;
-        public DbSet<Transcript> Transcripts { get; set; } = null!;
+        public DbSet<Transcript> Transcript { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

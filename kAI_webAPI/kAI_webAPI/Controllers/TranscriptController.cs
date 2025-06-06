@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using kAI_webAPI.Data;
 using kAI_webAPI.Dtos.Transcript;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Models.Transcript;
@@ -10,27 +10,28 @@ namespace kAI_webAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin, User")]
+    //[Authorize(Roles = "Admin, User")] // Phân quyền có thể tùy chỉnh nếu cần
+    [Authorize] // Chỉ cần xác thực người dùng, không cần phân quyền cụ thể
     public class TranscriptController : ControllerBase
     {
-        private readonly ITranscriptRepository _transcriptRepository;
-        private readonly IMapper _mapper;
-        public TranscriptController(ITranscriptRepository transcriptRepository, IMapper mapper)
+        private readonly ITranscriptRepository _transciptRepo;
+        private readonly ApplicationDBContext _context;
+        public TranscriptController(ITranscriptRepository transcriptRepo, ApplicationDBContext context)
         {
-            _transcriptRepository = transcriptRepository;
-            _mapper = mapper;
+            _transciptRepo = transcriptRepo;
+            _context = context;
         }
         [HttpPost]
-        public async Task<IActionResult> CreateTranscript([FromBody] TranscriptDTOs transcriptDto)
+        public async Task<IActionResult> CreateTranscript([FromBody] CreateTranscriptDTOs createTranscriptDto)
         {
-            if (transcriptDto == null)
+            if (createTranscriptDto == null)
                 return BadRequest("Transcript data is null.");
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out int userId))
-                return Unauthorized();
+            var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
+                return BadRequest("Invalid user ID.");
 
-            var ratings = transcriptDto.Ratings;
+            var ratings = createTranscriptDto.Ratings;
             if (ratings.Count != 25)
                 return BadRequest("Phải có đúng 25 giá trị rating (1–5).");
 
@@ -51,7 +52,7 @@ namespace kAI_webAPI.Controllers
                 Rating = "MBTI"
             };
 
-            await _transcriptRepository.AddTranscriptAsync(transcript); // Fixed method name
+            await _transciptRepo.AddTranscriptAsync(transcript);
             return Ok("Lưu transcript thành công.");
         }
     }
