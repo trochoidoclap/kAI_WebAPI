@@ -15,6 +15,7 @@ namespace kAI_webAPI.Mappers
         {
             return new UserDto
             {
+                Id_users = userModel.Id_users,
                 Username = userModel.Username,
                 Fullname = userModel.Fullname,
                 Email = userModel.Email,

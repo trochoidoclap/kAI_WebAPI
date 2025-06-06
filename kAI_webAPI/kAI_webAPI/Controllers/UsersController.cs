@@ -43,6 +43,7 @@ namespace kAI_webAPI.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
+                    new Claim(ClaimTypes.NameIdentifier, userDto.Id_users.ToString()),
                     new Claim(ClaimTypes.Name, userDto.Username),
                     new Claim(ClaimTypes.Email, userDto.Email ?? string.Empty),
                     new Claim("Fullname", userDto.Fullname ?? string.Empty),
