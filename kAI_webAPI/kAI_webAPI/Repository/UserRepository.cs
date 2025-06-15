@@ -17,7 +17,8 @@ namespace kAI_webAPI.Repository
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ApplicationDBContext _context; // Ensure 'DataContext' is defined in the 'kAI_webAPI.Data' namespace
+        private readonly ApplicationDBContext _context;
+
         public UserRepository(ApplicationDBContext context)
         {
             _context = context;
@@ -29,6 +30,18 @@ namespace kAI_webAPI.Repository
             await _context.SaveChangesAsync();
             return userModel;
         }
+
+        public Task AddUserAsync(User u)
+        {
+            _context.Users.Add(u);
+            return Task.CompletedTask;
+        }
+
+        public Task<User?> GetByUsernameAsync(string username) =>
+            _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+
+        public Task SaveChangesAsync() => _context.SaveChangesAsync();
+
         public async Task<User?> LoginUserSync(UserLoginDto userLoginDto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLoginDto.Username && u.Password == userLoginDto.Password);
@@ -38,6 +51,7 @@ namespace kAI_webAPI.Repository
             }
             return user;
         }
+
         public async Task<User?> DeleteUserSync(int id_user)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id_users == id_user);

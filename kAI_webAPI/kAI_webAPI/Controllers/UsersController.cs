@@ -6,6 +6,7 @@ using kAI_webAPI.Mappers;
 using kAI_webAPI.Models;
 using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.User;
+using kAI_WebAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,12 +27,19 @@ namespace kAI_webAPI.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IUserRepository _userRepo;
+        private readonly IPasswordHasherService _hasher;
         private readonly AppSetting _appSettings;
 
-        public UsersController(ApplicationDBContext context, IUserRepository userRepo, IOptionsMonitor<AppSetting> optionsMonitor)
+        public UsersController(
+            ApplicationDBContext context, 
+            IUserRepository userRepo,
+            IPasswordHasherService hasher,
+            IOptionsMonitor<AppSetting> optionsMonitor
+            )
         {
             _context = context;
             _userRepo = userRepo;
+            _hasher = hasher;
             _appSettings = optionsMonitor.CurrentValue;
         }
         private string GenerateToken(UserDto userDto)
@@ -74,6 +82,9 @@ namespace kAI_webAPI.Controllers
                 return BadRequest("Username, Password, and Fullname are required.");
             }
             var userModel = userDto.ToUserFromCreateDto();
+            var (hash, salt) = _hasher.HashPassword(userModel.Password);
+            userModel.Password_hash = hash; // Lưu trữ mật khẩu đã được băm
+            userModel.Password_salt = salt; // Lưu trữ muối để băm mật khẩu
             await _userRepo.AddUserSync(userModel);
             return Ok("User created successfully.");
         }
@@ -89,11 +100,16 @@ namespace kAI_webAPI.Controllers
             {
                 return BadRequest("Username and Password are required.");
             }
-            var user = await _userRepo.LoginUserSync(userLoginDto);
+            var user = await _userRepo.LoginUserSync(userLoginDto); // Pass the entire UserLoginDto object instead of just the username
             if (user == null)
             {
                 return Unauthorized("Invalid username or password.");
             }
+            if (!_hasher.Verify(userLoginDto.Password, user.Password_hash, user.Password_salt))
+            {
+                return Unauthorized("Invalid username or password.");
+            }
+
             var userDto = user.ToUserDto();
             return Ok(new ApiResponse
             {
