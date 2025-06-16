@@ -55,5 +55,19 @@ namespace kAI_webAPI.Controllers
             await _transciptRepo.AddTranscriptAsync(transcript);
             return Ok("Lưu transcript thành công.");
         }
+        [HttpGet("GetUserTranscripts")]
+        public async Task<IActionResult> GetUserTranscripts()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return BadRequest("Invalid user ID.");
+
+            var transcripts = await _transciptRepo.GetTranscriptsByUserId(userId);
+
+            if (transcripts == null || transcripts.Count == 0)
+                return NotFound("No transcripts found for the user.");
+
+            return Ok(transcripts);
+        }
     }
 }
