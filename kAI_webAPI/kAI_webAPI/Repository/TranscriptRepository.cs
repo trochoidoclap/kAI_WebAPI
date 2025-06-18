@@ -22,9 +22,12 @@ namespace kAI_webAPI.Repository
             return transcript;
         }
 
-        public Task<Transcript?> GetTranscript(int id)
+        public async Task<List<Transcript>> GetTranscriptsByUserId(int userId)
         {
-            throw new NotImplementedException();
+            return await _context.Transcript
+                .Where(t => t.Id_user == userId)
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
         }
     }
 }

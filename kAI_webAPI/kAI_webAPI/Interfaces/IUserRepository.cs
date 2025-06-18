@@ -16,5 +16,10 @@ namespace kAI_webAPI.Interfaces
         Task<User?> DeleteUserSync(int id_user);
         Task<List<User>?> GetAllUserSync(QueryObject query);
         Task<User?> GetUserByIdSync(int id_user);
+
+        Task AddUserAsync(User u);
+        Task<User?> GetByUsernameAsync(string username);
+        Task SaveChangesAsync();
+
     }
 }

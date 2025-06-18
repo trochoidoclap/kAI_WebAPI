@@ -25,10 +25,11 @@ namespace kAI_webAPI.Mappers
         }
         public static User ToUserFromCreateDto(this UserRegisterDto userDto)
         {
+            // Fix: Map Password to Password_hash since User does not have a Password property
             return new User
             {
                 Username = userDto.Username,
-                Password = userDto.Password,
+                Password_hash = userDto.Password, // Corrected mapping
                 Fullname = userDto.Fullname,
                 Email = userDto.Email,
                 Phone = userDto.Phone,

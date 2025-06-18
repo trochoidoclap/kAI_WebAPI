@@ -13,5 +13,6 @@ namespace kAI_webAPI.Models.Transcript
         public string Content { get; set; } = string.Empty;
         [StringLength(4)]
         public string Rating { get; set; } = string.Empty;
+
     }
 }

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `questions` (
   CONSTRAINT `FK_questions_questions_type` FOREIGN KEY (`type`) REFERENCES `questions_type` (`id_questype`)
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='id_question : ko cần bàn :))\r\ntype (link với idtype trong bảng questions_type) : dạng câu hỏi tương ứng với mật mã Holland của nó\r\ncontent : câu hỏi';
 
--- Dumping data for table format.questions: ~25 rows (approximately)
+-- Dumping data for table format.questions: ~3 rows (approximately)
 DELETE FROM `questions`;
 INSERT INTO `questions` (`id_question`, `type`, `content`, `score`) VALUES
 	(1, 2, 'Tôi thích giải các bài toán logic và câu đố toán học trừu tượng.', 0),
@@ -137,12 +137,28 @@ CREATE TABLE IF NOT EXISTS `transcript` (
   PRIMARY KEY (`id_transcript`),
   KEY `FK__users` (`id_user`),
   CONSTRAINT `FK__users` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_users`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='id_trascript : mã bài làm\r\nid_user (link đến id_user trong bàng users) : người dùng làm bài tnghiệm ấy\r\ndate : ngày làm\r\ncontent : nội dung làm (độ dài xâu cố định với format 01X02X03X...23X24X25X với X là số chỉ mức độ hài lòng từ 1->5, xem ví dụ hiểu rõ thêm :)))\r\nrating : nội dung con API trả (aka. kết quả chung/cuối cùng) theo mã Holland/MBTI?';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='id_trascript : mã bài làm\r\nid_user (link đến id_user trong bàng users) : người dùng làm bài tnghiệm ấy\r\ndate : ngày làm\r\ncontent : nội dung làm (độ dài xâu cố định với format 01X02X03X...23X24X25X với X là số chỉ mức độ hài lòng từ 1->5, xem ví dụ hiểu rõ thêm :)))\r\nrating : nội dung con API trả (aka. kết quả chung/cuối cùng) theo mã Holland/MBTI?';
 
 -- Dumping data for table format.transcript: ~0 rows (approximately)
 DELETE FROM `transcript`;
 INSERT INTO `transcript` (`id_transcript`, `id_user`, `date`, `content`, `rating`) VALUES
-	(00000001, 1, '2025-05-30', '012024035042053063071085092102113125134142152161174185192203214224235245251', 'A');
+	(00000001, 1, '2025-05-30', '012024035042053063071085092102113125134142152161174185192203214224235245251', 'A'),
+	(00000003, 2, '2025-06-06', '011021031041051061071081091101111121131141151161171181191201211221231241251', 'MBTI'),
+	(00000004, 2, '2025-06-09', '011021031041051061071081091101111121131141151161171181191201211221231241251', 'MBTI');
+
+-- Dumping structure for table format.transcript_remark
+CREATE TABLE IF NOT EXISTS `transcript_remark` (
+  `Id_remark` int NOT NULL AUTO_INCREMENT,
+  `Id_transcript` int(8) unsigned zerofill NOT NULL,
+  `Content` text COLLATE utf8mb4_general_ci,
+  `Choose` varchar(10) COLLATE utf8mb4_general_ci DEFAULT '',
+  PRIMARY KEY (`Id_remark`),
+  KEY `Id_transcript` (`Id_transcript`),
+  CONSTRAINT `Id_transcript` FOREIGN KEY (`Id_transcript`) REFERENCES `transcript` (`id_transcript`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table format.transcript_remark: ~0 rows (approximately)
+DELETE FROM `transcript_remark`;
 
 -- Dumping structure for table format.users
 CREATE TABLE IF NOT EXISTS `users` (
@@ -151,15 +167,19 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(50) NOT NULL DEFAULT '0',
   `fullname` text NOT NULL,
   `email` varchar(50) NOT NULL DEFAULT '0',
-  `phone` varchar(10) NOT NULL DEFAULT '',
+  `phone` varchar(15) NOT NULL DEFAULT '',
   `address` text NOT NULL,
+  `password_hash` text NOT NULL,
+  `password_salt` text NOT NULL,
   PRIMARY KEY (`id_users`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='cả cái bảng này ko có j phải bàn nữa cả :)))';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='NOTES: Sắp loại bỏ phần password';
 
--- Dumping data for table format.users: ~1 rows (approximately)
+-- Dumping data for table format.users: ~3 rows (approximately)
 DELETE FROM `users`;
-INSERT INTO `users` (`id_users`, `username`, `password`, `fullname`, `email`, `phone`, `address`) VALUES
-	(1, 'test', 'test', 'Nguyễn Văn A', 'test@email.com', '0900000000', 'add');
+INSERT INTO `users` (`id_users`, `username`, `password`, `fullname`, `email`, `phone`, `address`, `password_hash`, `password_salt`) VALUES
+	(1, 'test', 'test', 'Nguyễn Văn A', 'test@email.com', '0900000000', 'add', '', ''),
+	(2, 'nglong', 'long1643', 'NguyenThanhLong', 'longngueynthanh@example.com', '0978839447', '18C', '', ''),
+	(3, 'string', 'string', 'string', 'user@example.com', '19006067', 'string', 'a/7YDpIiUhGnq0KDudwpNacfV93axc05RKw4g6JLt9Y=', 'BinlQL2OwFy6HL09WSywbQ==');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

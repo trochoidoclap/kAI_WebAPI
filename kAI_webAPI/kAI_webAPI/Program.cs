@@ -1,17 +1,18 @@
 ﻿using kAI_webAPI.Data;
 using kAI_webAPI.Interfaces;
+using kAI_webAPI.Models;
 using kAI_webAPI.Models.Question;
-using kAI_webAPI.Models.User;
 using kAI_webAPI.Models.Subjects;
+using kAI_webAPI.Models.User;
 using kAI_webAPI.Repository;
+using kAI_WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.EntityFrameworkCore; // Ensure this is included
 using Microsoft.Extensions.DependencyInjection; // Ensure this is included
 using Microsoft.IdentityModel.Tokens;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using kAI_webAPI.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,12 +31,10 @@ if (string.IsNullOrEmpty(connString))
 }
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseMySql(
-        connString,
-        new MySqlServerVersion(new Version(8, 0, 40))
-    ));
+    options.UseSqlServer(connString));
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IPasswordHasherService, Pbkdf2PasswordHasher>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
