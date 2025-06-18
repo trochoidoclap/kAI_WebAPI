@@ -82,7 +82,9 @@ namespace kAI_webAPI.Controllers
                 return BadRequest("Username, Password, and Fullname are required.");
             }
             var userModel = userDto.ToUserFromCreateDto();
-            var (hash, salt) = _hasher.HashPassword(userModel.Password);
+
+            // Fix: Ensure the UserRegisterDto contains a Password property, as the User model does not have one.
+            var (hash, salt) = _hasher.HashPassword(userDto.Password); // Use userDto.Password instead of userModel.Password
             userModel.Password_hash = hash; // Lưu trữ mật khẩu đã được băm
             userModel.Password_salt = salt; // Lưu trữ muối để băm mật khẩu
             await _userRepo.AddUserSync(userModel);
@@ -104,6 +106,11 @@ namespace kAI_webAPI.Controllers
             if (user == null)
             {
                 return Unauthorized("Invalid username or password.");
+            }
+            // Debug: kiểm tra giá trị hash/salt
+            if (string.IsNullOrEmpty(user.Password_hash) || string.IsNullOrEmpty(user.Password_salt))
+            {
+                return StatusCode(500, "Hash hoặc salt bị thiếu trong DB.");
             }
             if (!_hasher.Verify(userLoginDto.Password, user.Password_hash, user.Password_salt))
             {

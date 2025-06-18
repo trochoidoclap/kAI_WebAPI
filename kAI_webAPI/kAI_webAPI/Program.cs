@@ -31,10 +31,7 @@ if (string.IsNullOrEmpty(connString))
 }
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseMySql(
-        connString,
-        new MySqlServerVersion(new Version(8, 0, 40))
-    ));
+    options.UseSqlServer(connString));
 
 builder.Services.AddControllers();
 builder.Services.AddSingleton<IPasswordHasherService, Pbkdf2PasswordHasher>();

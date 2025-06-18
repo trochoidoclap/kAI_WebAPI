@@ -44,12 +44,17 @@ namespace kAI_webAPI.Repository
 
         public async Task<User?> LoginUserSync(UserLoginDto userLoginDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == userLoginDto.Username && u.Password == userLoginDto.Password);
-            if (user == null)
+            // Chỉ lấy user theo username, KHÔNG kiểm tra password ở đây
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == userLoginDto.Username);
+        }
+
+        private bool VerifyPassword(string password, string storedHash, string storedSalt)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(Convert.FromBase64String(storedSalt)))
             {
-                return null;
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(computedHash) == storedHash;
             }
-            return user;
         }
 
         public async Task<User?> DeleteUserSync(int id_user)
@@ -126,7 +131,14 @@ namespace kAI_webAPI.Repository
                 return null;
             }
             userModel.Username = updateDto.Username;
-            userModel.Password = updateDto.Password;
+
+            // Update password hash and salt instead of a non-existent Password property
+            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            {
+                userModel.Password_salt = Convert.ToBase64String(hmac.Key);
+                userModel.Password_hash = Convert.ToBase64String(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(updateDto.Password)));
+            }
+
             userModel.Fullname = updateDto.Fullname;
             userModel.Email = updateDto.Email;
             userModel.Phone = updateDto.Phone;

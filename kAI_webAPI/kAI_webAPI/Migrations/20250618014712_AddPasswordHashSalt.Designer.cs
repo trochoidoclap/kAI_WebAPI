@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using kAI_webAPI.Data;
 
@@ -11,9 +12,11 @@ using kAI_webAPI.Data;
 namespace kAI_webAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class UserscontextModelSnapshot : ModelSnapshot
+    [Migration("20250618014712_AddPasswordHashSalt")]
+    partial class AddPasswordHashSalt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
