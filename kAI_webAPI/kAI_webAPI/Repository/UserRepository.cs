@@ -1,6 +1,7 @@
 ﻿using kAI_webAPI.Dtos.User;
 using kAI_webAPI.Interfaces;
 using kAI_webAPI.Models.User;
+using kAI_WebAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,12 @@ namespace kAI_webAPI.Repository
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDBContext _context;
+        private readonly IPasswordHasherService _hasher;
 
-        public UserRepository(ApplicationDBContext context)
+        public UserRepository(ApplicationDBContext context, IPasswordHasherService hasher)
         {
             _context = context;
+            _hasher = hasher;
         }
 
         public async Task<User?> AddUserSync(User userModel)
@@ -132,11 +135,12 @@ namespace kAI_webAPI.Repository
             }
             userModel.Username = updateDto.Username;
 
-            // Update password hash and salt instead of a non-existent Password property
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            // Sử dụng service băm mật khẩu
+            if (!string.IsNullOrEmpty(updateDto.Password))
             {
-                userModel.Password_salt = Convert.ToBase64String(hmac.Key);
-                userModel.Password_hash = Convert.ToBase64String(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(updateDto.Password)));
+                var (hash, salt) = _hasher.HashPassword(updateDto.Password);
+                userModel.Password_hash = hash;
+                userModel.Password_salt = salt;
             }
 
             userModel.Fullname = updateDto.Fullname;
