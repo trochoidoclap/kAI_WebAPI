@@ -6,6 +6,7 @@ using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.User;
 using kAI_webAPI.Repository;
 using kAI_WebAPI.Services;
+using kAI_webAPI.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
@@ -92,6 +93,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ClockSkew = TimeSpan.Zero // Optional: Set to zero to avoid clock skew issues
     };
 });
+builder.Services.AddHostedService<kAI_webAPI.Services.SessionTimeoutService>();
 
 var app = builder.Build();
 
@@ -101,6 +103,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseMiddleware<LoggingMiddleware>();
+
+app.UseMiddleware<UserAgentMiddleware>();
 
 app.UseHttpsRedirection();
 

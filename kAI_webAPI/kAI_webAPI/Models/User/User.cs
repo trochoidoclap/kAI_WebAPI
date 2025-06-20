@@ -18,5 +18,7 @@ namespace kAI_webAPI.Models.User
         public string Address { get; set; } = string.Empty;
         public string Password_hash { get; set; } = string.Empty;
         public string Password_salt { get; set; } = string.Empty;
+
+
     }
 }

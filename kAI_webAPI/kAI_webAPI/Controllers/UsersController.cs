@@ -7,6 +7,7 @@ using kAI_webAPI.Models;
 using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.User;
 using kAI_WebAPI.Services;
+using kAI_webAPI.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -171,6 +172,21 @@ namespace kAI_webAPI.Controllers
             }
             var userDto = user.ToUserDto();
             return Ok(userDto);
+        }
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            // Lấy sessionId từ cookie
+            var sessionId = Request.Cookies["X-Session-Id"];
+            if (!string.IsNullOrEmpty(sessionId))
+            {
+                Logger.EndSession(sessionId);
+            }
+
+            // Xóa cookie session nếu muốn
+            Response.Cookies.Delete("X-Session-Id");
+
+            return Ok(new { message = "Logged out and session log finalized." });
         }
     }
 }
