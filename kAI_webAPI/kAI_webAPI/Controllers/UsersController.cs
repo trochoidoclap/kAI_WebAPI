@@ -178,14 +178,12 @@ namespace kAI_webAPI.Controllers
         [Authorize]
         public IActionResult Logout()
         {
-            // Lấy sessionId từ cookie
             var sessionId = Request.Cookies["X-Session-Id"];
             if (!string.IsNullOrEmpty(sessionId))
             {
                 Logger.EndSession(sessionId);
             }
 
-            // Xóa cookie session nếu muốn
             Response.Cookies.Delete("X-Session-Id");
             Response.Cookies.Delete("jwtToken");
 
