@@ -4,6 +4,7 @@ using kAI_webAPI.Interfaces;
 using kAI_webAPI.Models.Transcript;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text;
 namespace kAI_webAPI.Controllers
@@ -55,6 +56,38 @@ namespace kAI_webAPI.Controllers
             await _transciptRepo.AddTranscriptAsync(transcript);
             return Ok("Lưu transcript thành công.");
         }
+        [HttpPost("CreateTranscriptRemark")]
+        public async Task<IActionResult> CreateTranscriptRemark([FromBody] CreateTranscriptRemarkDto createTranscriptRemarkDto)
+        {
+            if (createTranscriptRemarkDto == null)
+                return BadRequest("Transcript remark data is null.");
+
+            var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
+                return BadRequest("Invalid user ID.");
+
+            var Id_transcript = createTranscriptRemarkDto.Id_transcript;
+            // Check if the transcript exists for the user
+            var transcriptRemark = await _context.Transcript
+                .FirstOrDefaultAsync(t => t.Id_transcript == Id_transcript && t.Id_user == userId);
+            if (transcriptRemark == null)
+                return NotFound("Transcript not found for the user.");
+
+            // Validate the remark text and choice
+            if (string.IsNullOrWhiteSpace(createTranscriptRemarkDto.Text) || string.IsNullOrWhiteSpace(createTranscriptRemarkDto.Choose))
+                return BadRequest("Text and choice cannot be empty.");
+
+            // Create a new Remark object and populate its properties
+            var remark = new Remark
+            {
+                Id_transcript = transcriptRemark.Id_transcript,
+                Text = createTranscriptRemarkDto.Text,
+                Choose = createTranscriptRemarkDto.Choose
+            };
+            await _transciptRepo.AddRemarkAsync(remark);
+
+            return Ok("Transcript remark added successfully.");
+        }
         [HttpGet("GetUserTranscripts")]
         public async Task<IActionResult> GetUserTranscripts()
         {
@@ -62,12 +95,26 @@ namespace kAI_webAPI.Controllers
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 return BadRequest("Invalid user ID.");
 
+            var getTranscripts = new List<GetTranscriptsDto>();
+
             var transcripts = await _transciptRepo.GetTranscriptsByUserId(userId);
 
             if (transcripts == null || transcripts.Count == 0)
                 return NotFound("No transcripts found for the user.");
 
             return Ok(transcripts);
+        }
+        [HttpGet("GetTranscriptRemarks/{transcriptId}")]
+        public async Task<IActionResult> GetTranscriptRemarks(int transcriptId)
+        {
+            var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
+                return BadRequest("Invalid user ID.");
+
+            var remarks = await _transciptRepo.GetTranscriptRemarksById(userId);
+            if (remarks == null || remarks.Count == 0)
+                return NotFound("No remarks found for the transcript.");
+            return Ok(remarks);
         }
     }
 }
