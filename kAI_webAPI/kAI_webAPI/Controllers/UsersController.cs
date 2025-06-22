@@ -20,6 +20,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace kAI_webAPI.Controllers
 {
@@ -207,19 +208,24 @@ namespace kAI_webAPI.Controllers
             return Ok(userDto);
         }
         [HttpPost("Logout")]
+        [Authorize]
         public IActionResult Logout()
         {
-            // Lấy sessionId từ cookie
             var sessionId = Request.Cookies["X-Session-Id"];
             if (!string.IsNullOrEmpty(sessionId))
             {
                 Logger.EndSession(sessionId);
             }
 
-            // Xóa cookie session nếu muốn
             Response.Cookies.Delete("X-Session-Id");
+            Response.Cookies.Delete("jwtToken");
 
-            return Ok(new { message = "Logged out and session log finalized." });
+            return Ok(new
+            {
+                status = "Success",
+                message = "Successfully Log Out."
+            });
+
         }
         [HttpPost("RenewToken")]
         public async Task<IActionResult> RenewToken([FromBody] TokenModel tokenModel)
