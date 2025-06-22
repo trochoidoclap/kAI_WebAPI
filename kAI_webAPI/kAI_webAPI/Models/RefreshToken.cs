@@ -11,6 +11,7 @@ namespace kAI_webAPI.Models
         public int Id_users { get; set; }
         [ForeignKey(nameof(Id_users))]
         public kAI_webAPI.Models.User.User User { get; set; } = null!;
+        [Required]
         public string Token { get; set; } = string.Empty;
         public string JwtId { get; set; } = string.Empty;
         public bool IsUsed { get; set; } = false;

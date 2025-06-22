@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using kAI_webAPI.Data;
@@ -11,8 +12,8 @@ using kAI_webAPI.Data;
 namespace kAI_webAPI.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250604175418_ChangePhoneToString")]
-    partial class ChangePhoneToString
+    [Migration("20250622145258_AddRefreshTokenOnly")]
+    partial class AddRefreshTokenOnly
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,7 +21,9 @@ namespace kAI_webAPI.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("kAI_webAPI.Models.Question.Question", b =>
                 {
@@ -28,9 +31,11 @@ namespace kAI_webAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_question"));
+
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
@@ -51,22 +56,60 @@ namespace kAI_webAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_questype"));
+
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Comment_vn")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Questype")
                         .IsRequired()
                         .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("Id_questype");
 
                     b.ToTable("QuestionsTypes");
+                });
+
+            modelBuilder.Entity("kAI_webAPI.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Id_users")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id_users");
+
+                    b.ToTable("RefreshToken");
                 });
 
             modelBuilder.Entity("kAI_webAPI.Models.Subjects.Subjects", b =>
@@ -75,14 +118,16 @@ namespace kAI_webAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_subjects"));
+
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("type");
 
                     b.Property<string>("subject_name")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("subject");
 
                     b.HasKey("Id_subjects");
@@ -95,6 +140,8 @@ namespace kAI_webAPI.Migrations
                     b.Property<int>("Id_subgroup")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_subgroup"));
 
                     b.Property<int>("Subject1")
                         .HasColumnType("int");
@@ -126,39 +173,99 @@ namespace kAI_webAPI.Migrations
                     b.ToTable("subjects_group", (string)null);
                 });
 
+            modelBuilder.Entity("kAI_webAPI.Models.Transcript.Remark", b =>
+                {
+                    b.Property<int>("Id_remark")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_remark"));
+
+                    b.Property<string>("Choose")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Id_transcript")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id_remark");
+
+                    b.HasIndex("Id_transcript");
+
+                    b.ToTable("Remark");
+                });
+
+            modelBuilder.Entity("kAI_webAPI.Models.Transcript.Transcript", b =>
+                {
+                    b.Property<int>("Id_transcript")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_transcript"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Id_user")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Rating")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.HasKey("Id_transcript");
+
+                    b.HasIndex("Id_user");
+
+                    b.ToTable("Transcript");
+                });
+
             modelBuilder.Entity("kAI_webAPI.Models.User.User", b =>
                 {
                     b.Property<int>("Id_users")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id_users"));
+
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Fullname")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("Password_hash")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password_salt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id_users");
 
@@ -174,6 +281,17 @@ namespace kAI_webAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("QuestionsType");
+                });
+
+            modelBuilder.Entity("kAI_webAPI.Models.RefreshToken", b =>
+                {
+                    b.HasOne("kAI_webAPI.Models.User.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Id_users")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("kAI_webAPI.Models.Subjects.SubjectsGroup", b =>
@@ -215,6 +333,28 @@ namespace kAI_webAPI.Migrations
                     b.Navigation("Subject4Navigation");
 
                     b.Navigation("Subject5Navigation");
+                });
+
+            modelBuilder.Entity("kAI_webAPI.Models.Transcript.Remark", b =>
+                {
+                    b.HasOne("kAI_webAPI.Models.Transcript.Transcript", "Transcript")
+                        .WithMany()
+                        .HasForeignKey("Id_transcript")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Transcript");
+                });
+
+            modelBuilder.Entity("kAI_webAPI.Models.Transcript.Transcript", b =>
+                {
+                    b.HasOne("kAI_webAPI.Models.User.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Id_user")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("kAI_webAPI.Models.Question.Questions_type", b =>

@@ -1,4 +1,5 @@
-﻿using kAI_webAPI.Models.Question;
+﻿using kAI_webAPI.Models;
+using kAI_webAPI.Models.Question;
 using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.Transcript;
 using kAI_webAPI.Models.User;
@@ -14,13 +15,14 @@ namespace kAI_webAPI.Data
         {
         }
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Questions_type> QuestionsTypes { get; set; }
         public DbSet<Subjects> Subjects { get; set; }
         public DbSet<SubjectsGroup> SubjectsGroups { get; set; }
         public DbSet<Transcript> Transcript { get; set; }
-        public DbSet<Remark> Remark { get; set; } // Add this line to define the Remark DbSet  
+        public DbSet<Remark> Remark { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

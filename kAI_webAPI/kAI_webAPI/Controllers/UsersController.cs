@@ -18,6 +18,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace kAI_webAPI.Controllers
@@ -43,7 +44,7 @@ namespace kAI_webAPI.Controllers
             _hasher = hasher;
             _appSettings = optionsMonitor.CurrentValue;
         }
-        private string GenerateToken(UserDto userDto)
+        private async Task<TokenModel> GenerateToken(UserDto userDto)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -63,10 +64,41 @@ namespace kAI_webAPI.Controllers
                     new Claim("TokenId", Guid.NewGuid().ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7), // Token expires in 7 days
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), 
+                SecurityAlgorithms.HmacSha256Signature)
             };
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-            return jwtTokenHandler.WriteToken(token);
+            var accessToken = jwtTokenHandler.WriteToken(token);
+            var refreshToken = GenerateRefreshToken();
+            var refreshTokenEntity = new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                Id_users = userDto.Id_users,
+                Token = refreshToken,
+                JwtId = token.Id,
+                IsUsed = false,
+                IsRevoked = false,
+                IssuedAt = DateTime.UtcNow,
+                ExpiredAt = DateTime.UtcNow.AddDays(30), // Refresh token expires in 30 days
+            };
+            await _context.AddAsync(refreshTokenEntity);
+            await _context.SaveChangesAsync();
+
+            return new TokenModel
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+            };
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
 
         [HttpPost]
@@ -119,11 +151,12 @@ namespace kAI_webAPI.Controllers
             }
 
             var userDto = user.ToUserDto();
+            var token = await GenerateToken(userDto); 
             return Ok(new ApiResponse
             {
                 Status = "Success",
                 Message = "Login successful.",
-                Data = GenerateToken(userDto)
+                Data = token
             });
         }
         [HttpPut]
@@ -188,5 +221,140 @@ namespace kAI_webAPI.Controllers
 
             return Ok(new { message = "Logged out and session log finalized." });
         }
+        [HttpPost("RenewToken")]
+        public async Task<IActionResult> RenewToken([FromBody] TokenModel tokenModel)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+            var tokenValidateParam = new TokenValidationParameters
+            {
+                // Tự cấp token
+                ValidateIssuer = false,
+                ValidateAudience = false,
+
+                // ký vào token
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+
+                ClockSkew = TimeSpan.Zero,
+                ValidateLifetime = false, // ko kiểm tra hết hạn
+            };
+            try
+            {
+                // check 1 : AccessToken valid format
+                var tokenInVerification = jwtTokenHandler.ValidateToken(tokenModel.AccessToken, 
+                    tokenValidateParam, out var validatedToken);
+
+                //check 2 : Check alg
+                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                {
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, 
+                        StringComparison.InvariantCultureIgnoreCase);
+                    if (!result) // false
+                    {
+                        return Ok(new ApiResponse
+                        {
+                            Status = "Error",
+                            Message = "Invalid token"
+                        });
+                    }
+                }
+                //check 3 : Check accessToken expire?
+                var utcExpireDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => 
+                    x.Type == JwtRegisteredClaimNames.Exp)?.Value ?? "0");
+                var expireDate = ConvertUnixTimeToDateTime(utcExpireDate);
+                if (expireDate > DateTime.UtcNow)
+                {
+                    return Ok(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "Access token is still valid."
+                    });
+                }
+                //check 4 : Check refreshToken exist in DB
+                var storedToken = _context.RefreshTokens.FirstOrDefault(x => 
+                    x.Token == tokenModel.RefreshToken);
+                if (storedToken == null)
+                {
+                    return Ok(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "Refresh token does not exist."
+                    });
+                }
+
+                //check 5 : Check refreshToken is used/revoked?
+                if (storedToken.IsUsed)
+                {
+                    return Ok(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "Refresh token has already been used."
+                    });
+                }
+                if (storedToken.IsRevoked)
+                {
+                    return Ok(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "Refresh token has been revoked."
+                    });
+                }
+
+                //check 6 : AccessToken id == JwtId in refreshToken?
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => 
+                    x.Type == JwtRegisteredClaimNames.Jti)?.Value;
+                if (storedToken.JwtId != jti)
+                {
+                    return Ok(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "Invalid token ID."
+                    });
+                }
+
+                // Update token is used
+                storedToken.IsUsed = true;
+                storedToken.IsRevoked = true;
+                _context.Update(storedToken);
+                await _context.SaveChangesAsync();
+                // create new token
+                var user = await _userRepo.GetUserByIdSync(int.Parse(tokenInVerification.Claims.FirstOrDefault(x => 
+                x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0"));
+                if (user == null)
+                {
+                    return NotFound(new ApiResponse
+                    {
+                        Status = "Error",
+                        Message = "User not found."
+                    });
+                }
+
+                var userDto = user.ToUserDto();
+                var token = await GenerateToken(userDto);
+                return Ok(new ApiResponse
+                {
+                    Status = "Success",
+                    Message = "Token renewed successfully.",
+                    Data = token
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Status = "Error",
+                    Message = "Something went wrong"
+                });
+            }
+        }
+
+        private DateTime ConvertUnixTimeToDateTime(long utcExpireDate)
+        {
+            var dateTimeInterval = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            dateTimeInterval.AddSeconds(utcExpireDate).ToUniversalTime();
+
+            return dateTimeInterval;
+        }
     }
-}
+    }
