@@ -19,6 +19,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace kAI_webAPI.Controllers
 {
@@ -174,6 +175,7 @@ namespace kAI_webAPI.Controllers
             return Ok(userDto);
         }
         [HttpPost("Logout")]
+        [Authorize]
         public IActionResult Logout()
         {
             // Lấy sessionId từ cookie
@@ -185,8 +187,14 @@ namespace kAI_webAPI.Controllers
 
             // Xóa cookie session nếu muốn
             Response.Cookies.Delete("X-Session-Id");
+            Response.Cookies.Delete("jwtToken");
 
-            return Ok(new { message = "Logged out and session log finalized." });
+            return Ok(new
+            {
+                status = "Success",
+                message = "Successfully Log Out."
+            });
+
         }
     }
 }
