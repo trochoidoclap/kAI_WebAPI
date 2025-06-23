@@ -50,6 +50,7 @@ namespace kAI_webAPI.Controllers
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
             var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+            var jti = Guid.NewGuid().ToString();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -60,11 +61,9 @@ namespace kAI_webAPI.Controllers
                     new Claim("Fullname", userDto.Fullname ?? string.Empty),
                     new Claim("Phone", userDto.Phone.ToString()),
                     new Claim("Address", userDto.Address ?? string.Empty),
-                    // roles cos thể được thêm vào đây nếu cần
-                    
-                    new Claim("TokenId", Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, jti) // Thêm dòng này
                 }),
-                Expires = DateTime.UtcNow.AddDays(7), // Token expires in 7 days
+                Expires = DateTime.UtcNow.AddSeconds(10), // Token expires in 7 days
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), 
                 SecurityAlgorithms.HmacSha256Signature)
             };
@@ -76,11 +75,11 @@ namespace kAI_webAPI.Controllers
                 Id = Guid.NewGuid(),
                 Id_users = userDto.Id_users,
                 Token = refreshToken,
-                JwtId = token.Id,
+                JwtId = jti,
                 IsUsed = false,
                 IsRevoked = false,
                 IssuedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddDays(30), // Refresh token expires in 30 days
+                ExpiredAt = DateTime.UtcNow.AddDays(7), // Refresh token expires in 30 days
             };
             await _context.AddAsync(refreshTokenEntity);
             await _context.SaveChangesAsync();
@@ -234,106 +233,67 @@ namespace kAI_webAPI.Controllers
             var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
             var tokenValidateParam = new TokenValidationParameters
             {
-                // Tự cấp token
                 ValidateIssuer = false,
                 ValidateAudience = false,
-
-                // ký vào token
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
-
                 ClockSkew = TimeSpan.Zero,
-                ValidateLifetime = false, // ko kiểm tra hết hạn
+                ValidateLifetime = false,
             };
             try
             {
-                // check 1 : AccessToken valid format
-                var tokenInVerification = jwtTokenHandler.ValidateToken(tokenModel.AccessToken, 
-                    tokenValidateParam, out var validatedToken);
+                var tokenInVerification = jwtTokenHandler.ValidateToken(tokenModel.AccessToken, tokenValidateParam, out var validatedToken);
 
-                //check 2 : Check alg
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
-                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, 
-                        StringComparison.InvariantCultureIgnoreCase);
-                    if (!result) // false
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+                    if (!result)
                     {
-                        return Ok(new ApiResponse
-                        {
-                            Status = "Error",
-                            Message = "Invalid token"
-                        });
+                        return Ok(new ApiResponse { Status = "Error", Message = "Invalid token" });
                     }
                 }
-                //check 3 : Check accessToken expire?
-                var utcExpireDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => 
-                    x.Type == JwtRegisteredClaimNames.Exp)?.Value ?? "0");
+
+                var utcExpireDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value ?? "0");
                 var expireDate = ConvertUnixTimeToDateTime(utcExpireDate);
                 if (expireDate > DateTime.UtcNow)
                 {
-                    return Ok(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "Access token is still valid."
-                    });
-                }
-                //check 4 : Check refreshToken exist in DB
-                var storedToken = _context.RefreshTokens.FirstOrDefault(x => 
-                    x.Token == tokenModel.RefreshToken);
-                if (storedToken == null)
-                {
-                    return Ok(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "Refresh token does not exist."
-                    });
+                    return Ok(new ApiResponse { Status = "Error", Message = "Access token is still valid." });
                 }
 
-                //check 5 : Check refreshToken is used/revoked?
+                var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenModel.RefreshToken);
+                if (storedToken == null)
+                {
+                    return Ok(new ApiResponse { Status = "Error", Message = "Refresh token does not exist." });
+                }
+
                 if (storedToken.IsUsed)
                 {
-                    return Ok(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "Refresh token has already been used."
-                    });
+                    return Ok(new ApiResponse { Status = "Error", Message = "Refresh token has already been used." });
                 }
                 if (storedToken.IsRevoked)
                 {
-                    return Ok(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "Refresh token has been revoked."
-                    });
+                    return Ok(new ApiResponse { Status = "Error", Message = "Refresh token has been revoked." });
+                }
+                if (storedToken.ExpiredAt < DateTime.UtcNow)
+                {
+                    return Ok(new ApiResponse { Status = "Error", Message = "Refresh token has expired." });
                 }
 
-                //check 6 : AccessToken id == JwtId in refreshToken?
-                var jti = tokenInVerification.Claims.FirstOrDefault(x => 
-                    x.Type == JwtRegisteredClaimNames.Jti)?.Value;
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
                 if (storedToken.JwtId != jti)
                 {
-                    return Ok(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "Invalid token ID."
-                    });
+                    return Ok(new ApiResponse { Status = "Error", Message = "Invalid token ID." });
                 }
 
-                // Update token is used
                 storedToken.IsUsed = true;
                 storedToken.IsRevoked = true;
                 _context.Update(storedToken);
                 await _context.SaveChangesAsync();
-                // create new token
-                var user = await _userRepo.GetUserByIdSync(int.Parse(tokenInVerification.Claims.FirstOrDefault(x => 
-                x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0"));
+
+                var user = await _userRepo.GetUserByIdSync(int.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0"));
                 if (user == null)
                 {
-                    return NotFound(new ApiResponse
-                    {
-                        Status = "Error",
-                        Message = "User not found."
-                    });
+                    return NotFound(new ApiResponse { Status = "Error", Message = "User not found." });
                 }
 
                 var userDto = user.ToUserDto();
@@ -347,20 +307,16 @@ namespace kAI_webAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApiResponse
-                {
-                    Status = "Error",
-                    Message = "Something went wrong"
-                });
+                Console.WriteLine(ex.ToString());
+                return BadRequest(new ApiResponse { Status = "Error", Message = "Something went wrong" });
             }
         }
 
         private DateTime ConvertUnixTimeToDateTime(long utcExpireDate)
         {
             var dateTimeInterval = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            dateTimeInterval.AddSeconds(utcExpireDate).ToUniversalTime();
-
+            dateTimeInterval = dateTimeInterval.AddSeconds(utcExpireDate).ToUniversalTime();
             return dateTimeInterval;
         }
     }
-    }
+}

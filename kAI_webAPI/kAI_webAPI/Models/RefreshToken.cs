@@ -13,6 +13,7 @@ namespace kAI_webAPI.Models
         public kAI_webAPI.Models.User.User User { get; set; } = null!;
         [Required]
         public string Token { get; set; } = string.Empty;
+        [Required]
         public string JwtId { get; set; } = string.Empty;
         public bool IsUsed { get; set; } = false;
         public bool IsRevoked { get; set; } = false;
