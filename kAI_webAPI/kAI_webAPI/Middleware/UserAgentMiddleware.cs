@@ -27,6 +27,11 @@ namespace kAI_webAPI.Middleware
                     Expires = DateTimeOffset.UtcNow.AddHours(12)
                 });
             }
+            
+            if (!context.Request.Headers.ContainsKey("User-Agent"))
+            {
+                context.Request.Headers["User-Agent"] = "kAI_WebApp Service / Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
+            }
 
             var userAgent = context.Request.Headers["User-Agent"].ToString();
             var path = context.Request.Path;
