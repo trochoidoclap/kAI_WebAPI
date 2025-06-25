@@ -17,14 +17,17 @@ namespace kAI_webAPI.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IQuestionsRepository _questionsRepo;
-        public QuestionsController(ApplicationDBContext context, IQuestionsRepository questionsRepo)
+        private readonly ILogger<QuestionsController> _logger;
+        public QuestionsController(ApplicationDBContext context, IQuestionsRepository questionsRepo, ILogger<QuestionsController> logger)
         {
             _context = context;
             _questionsRepo = questionsRepo;
+            _logger = logger;
         }
         [HttpGet]
         public async Task<IActionResult> GetAllQuestions()
         {
+            _logger.LogInformation("Fetching all questions at {Time}", DateTime.UtcNow);
             var questions = await _questionsRepo.GetAllQuestionsAsync();
             var questionsDtos = questions.Select(s => s.ToGetQuestionsDto());
             return Ok(questionsDtos);

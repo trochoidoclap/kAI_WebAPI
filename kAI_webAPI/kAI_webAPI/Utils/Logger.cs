@@ -9,7 +9,7 @@ namespace kAI_webAPI.Utils
     {
         private static string GetLogDirectory()
         {
-            var projectDir = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Logs"));
+            var projectDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
             Directory.CreateDirectory(projectDir);
             return projectDir;
         }
@@ -98,7 +98,10 @@ namespace kAI_webAPI.Utils
                 var logDir = GetLogDirectory();
                 var newFileName = $"Logs_{startTime}.txt";
                 var newFilePath = Path.Combine(logDir, newFileName);
-                File.Move(tempFile, newFilePath, true);
+                if (!string.Equals(tempFile, newFilePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Move(tempFile, newFilePath, true);
+                }
             }
             SessionLastActivity.TryRemove(sessionId, out _);
         }

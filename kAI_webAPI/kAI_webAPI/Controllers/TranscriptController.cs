@@ -17,28 +17,44 @@ namespace kAI_webAPI.Controllers
     {
         private readonly ITranscriptRepository _transciptRepo;
         private readonly ApplicationDBContext _context;
-        public TranscriptController(ITranscriptRepository transcriptRepo, ApplicationDBContext context)
+        private readonly ILogger<TranscriptController> _logger;
+        public TranscriptController(ITranscriptRepository transcriptRepo, ApplicationDBContext context, ILogger<TranscriptController> logger)
         {
             _transciptRepo = transcriptRepo;
             _context = context;
+            _logger = logger;
         }
         [HttpPost]
         public async Task<IActionResult> CreateTranscript([FromBody] CreateTranscriptDTOs createTranscriptDto)
         {
+            _logger.LogInformation("Creating a new transcript for user {UserId} at {Time}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value, DateTime.UtcNow);
             if (createTranscriptDto == null)
+            {
+                _logger.LogWarning("CreateTranscript called with null DTO at {Time}", DateTime.UtcNow);
                 return BadRequest("Transcript data is null.");
+            }
 
             var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
+            {
+                _logger.LogWarning("Invalid user ID claim at {Time}", DateTime.UtcNow);
                 return BadRequest("Invalid user ID.");
+            }
 
             var ratings = createTranscriptDto.ratings;
             if (ratings.Count != 25)
-                return BadRequest("Phải có đúng 25 giá trị rating (1–5).");
+            {
+                _logger.LogWarning("Invalid number of ratings provided: {Count} at {Time}", ratings.Count, DateTime.UtcNow);
+                if (ratings.Count < 25)
+                    return BadRequest("Phải có đủ 25 giá trị rating (1–5).");
+            }
 
             for (int i = 0; i < ratings.Count; i++)
                 if (ratings[i] < 1 || ratings[i] > 5)
+                {
+                    _logger.LogWarning("Invalid rating value at position {Position}: {Rating} at {Time}", i + 1, ratings[i], DateTime.UtcNow);
                     return BadRequest($"Giá trị rating tại vị trí {i + 1} phải nằm trong khoảng từ 1 đến 5.");
+                }
 
             // Tạo content dạng 01X02X...25X
             var sbContent = new StringBuilder();
@@ -54,11 +70,13 @@ namespace kAI_webAPI.Controllers
             };
 
             await _transciptRepo.AddTranscriptAsync(transcript);
+            _logger.LogInformation("Transcript created successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok("Lưu transcript thành công.");
         }
         [HttpPost("{id_transcript:int}/remarks")]
         public async Task<IActionResult> CreateTranscriptRemark([FromBody] CreateTranscriptRemarkDto createTranscriptRemarkDto)
         {
+            _logger.LogInformation("Creating a new transcript remark for user {UserId} at {Time}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value, DateTime.UtcNow);
             if (createTranscriptRemarkDto == null)
                 return BadRequest("Transcript remark data is null.");
 
@@ -85,12 +103,13 @@ namespace kAI_webAPI.Controllers
                 choose = createTranscriptRemarkDto.choose
             };
             await _transciptRepo.AddRemarkAsync(remark);
-
+            _logger.LogInformation("Transcript remark created successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok("Transcript remark added successfully.");
         }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUserTranscripts()
         {
+            _logger.LogInformation("Retrieving transcripts for user {UserId} at {Time}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value, DateTime.UtcNow);
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 return BadRequest("Invalid user ID.");
@@ -101,12 +120,13 @@ namespace kAI_webAPI.Controllers
 
             if (transcripts == null || transcripts.Count == 0)
                 return NotFound("No transcripts found for the user.");
-
+            _logger.LogInformation("Transcripts retrieved successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok(transcripts);
         }
         [HttpGet("{transcriptId:int}/remarks")]
         public async Task<IActionResult> GetTranscriptRemarks(int transcriptId)
         {
+            _logger.LogInformation("Retrieving remarks for transcript {TranscriptId} at {Time}", transcriptId, DateTime.UtcNow);
             var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
                 return BadRequest("Invalid user ID.");
@@ -114,6 +134,7 @@ namespace kAI_webAPI.Controllers
             var remarks = await _transciptRepo.GetTranscriptRemarksById(userId);
             if (remarks == null || remarks.Count == 0)
                 return NotFound("No remarks found for the transcript.");
+            _logger.LogInformation("Remarks retrieved successfully for transcript {TranscriptId} at {Time}", transcriptId, DateTime.UtcNow);
             return Ok(remarks);
         }
     }

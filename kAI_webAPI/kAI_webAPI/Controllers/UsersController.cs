@@ -32,18 +32,20 @@ namespace kAI_webAPI.Controllers
         private readonly IUserRepository _userRepo;
         private readonly IPasswordHasherService _hasher;
         private readonly AppSetting _appSettings;
-
+        private readonly ILogger<UsersController> _logger;
         public UsersController(
             ApplicationDBContext context, 
             IUserRepository userRepo,
             IPasswordHasherService hasher,
-            IOptionsMonitor<AppSetting> optionsMonitor
+            IOptionsMonitor<AppSetting> optionsMonitor,
+            ILogger<UsersController> logger
             )
         {
             _context = context;
             _userRepo = userRepo;
             _hasher = hasher;
             _appSettings = optionsMonitor.CurrentValue;
+            _logger = logger;
         }
         private async Task<TokenModel> GenerateToken(UserDto userDto)
         {
@@ -104,6 +106,7 @@ namespace kAI_webAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> ThemUser([FromBody] UserRegisterDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
         {
+            _logger.LogInformation("Received request to create user: {@UserDto}", userDto);
             if (userDto == null)
             {
                 return BadRequest("Invalid user data.");
@@ -120,37 +123,47 @@ namespace kAI_webAPI.Controllers
             userModel.password_hash = hash; // Lưu trữ mật khẩu đã được băm
             userModel.password_salt = salt; // Lưu trữ muối để băm mật khẩu
             await _userRepo.AddUserSync(userModel);
+            _logger.LogInformation("User created successfully: {@UserModel}", userModel);
             return Ok("User created successfully.");
         }
         [HttpPost("login")]
         public async Task<IActionResult> DangNhap([FromBody] UserLoginDto userLoginDto)
         {
+            _logger.LogInformation("Received login request for user: {@UserLoginDto}", userLoginDto);
             if (userLoginDto == null)
             {
+                _logger.LogWarning("Login request received with null UserLoginDto.");
                 return BadRequest("Invalid login data.");
             }
             // Kiểm tra các trường bắt buộc
             if (string.IsNullOrEmpty(userLoginDto.username) || string.IsNullOrEmpty(userLoginDto.password))
             {
+                _logger.LogWarning("Login request missing username or password.");
                 return BadRequest("Username and Password are required.");
             }
             var user = await _userRepo.LoginUserSync(userLoginDto); // Pass the entire UserLoginDto object instead of just the username
             if (user == null)
             {
+                _logger.LogWarning("Login failed for user: {Username}. User not found.", userLoginDto.username);
                 return Unauthorized("Invalid username or password.");
             }
             // Debug: kiểm tra giá trị hash/salt
             if (string.IsNullOrEmpty(user.password_hash) || string.IsNullOrEmpty(user.password_salt))
             {
+                _logger.LogError("Hash or salt is missing in the database for user: {Username}", user.username);
                 return StatusCode(500, "Hash hoặc salt bị thiếu trong DB.");
             }
             if (!_hasher.Verify(userLoginDto.password, user.password_hash, user.password_salt))
             {
+                _logger.LogWarning("Login failed for user: {Username}. Invalid password.", userLoginDto.username);
                 return Unauthorized("Invalid username or password.");
             }
-
             var userDto = user.ToUserDto();
             var token = await GenerateToken(userDto); 
+            _logger.LogInformation("User {Username} logged in successfully. Generating token.", userDto.username);
+            _logger.LogInformation("Generated token for user {Username}", userDto.username);
+            _logger.LogInformation("Refresh token for user {Username}", userDto.username);
+
             return Ok(new ApiResponse
             {
                 Status = "Success",
@@ -161,50 +174,63 @@ namespace kAI_webAPI.Controllers
         [HttpPut("{id_user:int}")]
         public async Task<IActionResult> CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
         {
+            _logger.LogInformation("Received request to update user with ID: {IdUser}", id_user);
             await _userRepo.UpdateUserSync(id_user, updateDto);
+            _logger.LogInformation("User with ID {IdUser} updated successfully.", id_user); 
             return Ok("User updated successfully.");
         }
 
         [HttpDelete("{id_user:int}")]
         public async Task<IActionResult> XoaUser(int id_user)
         {
+            _logger.LogInformation("Received request to delete user with ID: {IdUser}", id_user);
             if (id_user <= 0)
             {
+                _logger.LogWarning("Invalid user ID: {IdUser}", id_user);
                 return BadRequest("Invalid user ID.");
             }
             await _userRepo.DeleteUserSync(id_user);
+            _logger.LogInformation("User with ID {IdUser} deleted successfully.", id_user);
             return Ok("User deleted successfully.");
         }
         [HttpGet]
         public async Task<IActionResult> LayTatCaUsers([FromQuery] QueryObject query)
         {
+            _logger.LogInformation("Received request to get all users with query: {@Query}", query);
             var users = await _userRepo.GetAllUserSync(query);
             if (users == null)
             {
+                _logger.LogWarning("No users found.");
                 return NotFound("No users found.");
             }
             var userDtos = users.Select(s => s.ToUserDto());
+            _logger.LogInformation("Found {UserCount} users.", userDtos.Count());
             return Ok(userDtos);
         }
         [HttpGet("{id_user:int}")]
         public async Task<IActionResult> LayUserbyId_User(int id_user)
         {
+            _logger.LogInformation("Received request to get user by ID: {IdUser}", id_user);
             if (id_user <= 0)
             {
+                _logger.LogWarning("Invalid user ID: {IdUser}", id_user);
                 return BadRequest("Invalid user ID.");
             }
             var user = await _userRepo.GetUserByIdSync(id_user);
             if (user == null)
             {
+                _logger.LogWarning("User with ID {IdUser} not found.", id_user);
                 return NotFound("User not found.");
             }
             var userDto = user.ToUserDto();
+            _logger.LogInformation("User with ID {IdUser} found: {@UserDto}", id_user, userDto);
             return Ok(userDto);
         }
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
+            _logger.LogInformation("Received logout request for user: {Username}", User.Identity?.Name ?? "Unknown");
             var sessionId = Request.Cookies["X-Session-Id"];
             if (!string.IsNullOrEmpty(sessionId))
             {
@@ -214,6 +240,7 @@ namespace kAI_webAPI.Controllers
             Response.Cookies.Delete("X-Session-Id");
             Response.Cookies.Delete("jwtToken");
 
+            _logger.LogInformation("User logged out successfully. Session ID: {SessionId}", sessionId);
             return Ok(new
             {
                 status = "Success",
@@ -224,6 +251,7 @@ namespace kAI_webAPI.Controllers
         [HttpPost("renew-token")]
         public async Task<IActionResult> RenewToken([FromBody] TokenModel tokenModel)
         {
+            _logger.LogInformation("Received request to renew token for user: {Username}", User.Identity?.Name ?? "Unknown");
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var secretKeyBytes = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
             var tokenValidateParam = new TokenValidationParameters
@@ -237,6 +265,7 @@ namespace kAI_webAPI.Controllers
             };
             try
             {
+                _logger.LogInformation("Validating access token: {AccessToken}", tokenModel.AccessToken);
                 var tokenInVerification = jwtTokenHandler.ValidateToken(tokenModel.AccessToken, tokenValidateParam, out var validatedToken);
 
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
@@ -302,6 +331,7 @@ namespace kAI_webAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while renewing token for user: {Username}", User.Identity?.Name ?? "Unknown");
                 Console.WriteLine(ex.ToString());
                 return BadRequest(new ApiResponse { Status = "Error", Message = "Something went wrong" });
             }
