@@ -7,7 +7,6 @@ using kAI_webAPI.Models;
 using kAI_webAPI.Models.Subjects;
 using kAI_webAPI.Models.User;
 using kAI_WebAPI.Services;
-using kAI_webAPI.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -104,7 +103,7 @@ namespace kAI_webAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ThemUser([FromBody] UserRegisterDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
+        public async Task<IActionResult> Register([FromBody] UserRegisterDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
         {
             _logger.LogInformation("Received request to create user: {@UserDto}", userDto);
             if (userDto == null)
@@ -127,7 +126,8 @@ namespace kAI_webAPI.Controllers
             return Ok("User created successfully.");
         }
         [HttpPost("login")]
-        public async Task<IActionResult> DangNhap([FromBody] UserLoginDto userLoginDto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto,
+                                               [FromHeader(Name = "User-Agent")] string userAgent)
         {
             _logger.LogInformation("Received login request for user: {@UserLoginDto}", userLoginDto);
             if (userLoginDto == null)
@@ -172,7 +172,7 @@ namespace kAI_webAPI.Controllers
             });
         }
         [HttpPut("{id_user:int}")]
-        public async Task<IActionResult> CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
+        public async Task<IActionResult> UpdateUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
         {
             _logger.LogInformation("Received request to update user with ID: {IdUser}", id_user);
             await _userRepo.UpdateUserSync(id_user, updateDto);
@@ -181,7 +181,7 @@ namespace kAI_webAPI.Controllers
         }
 
         [HttpDelete("{id_user:int}")]
-        public async Task<IActionResult> XoaUser(int id_user)
+        public async Task<IActionResult> DeleteUser(int id_user)
         {
             _logger.LogInformation("Received request to delete user with ID: {IdUser}", id_user);
             if (id_user <= 0)
@@ -194,7 +194,7 @@ namespace kAI_webAPI.Controllers
             return Ok("User deleted successfully.");
         }
         [HttpGet]
-        public async Task<IActionResult> LayTatCaUsers([FromQuery] QueryObject query)
+        public async Task<IActionResult> GetAllUsers([FromQuery] QueryObject query)
         {
             _logger.LogInformation("Received request to get all users with query: {@Query}", query);
             var users = await _userRepo.GetAllUserSync(query);
@@ -208,7 +208,7 @@ namespace kAI_webAPI.Controllers
             return Ok(userDtos);
         }
         [HttpGet("{id_user:int}")]
-        public async Task<IActionResult> LayUserbyId_User(int id_user)
+        public async Task<IActionResult> GetUserById(int id_user)
         {
             _logger.LogInformation("Received request to get user by ID: {IdUser}", id_user);
             if (id_user <= 0)
@@ -234,7 +234,8 @@ namespace kAI_webAPI.Controllers
             var sessionId = Request.Cookies["X-Session-Id"];
             if (!string.IsNullOrEmpty(sessionId))
             {
-                Logger.EndSession(sessionId);
+                // Fix: Replace Logger.EndSession with _logger.LogInformation or remove the line if unnecessary
+                _logger.LogInformation("Ending session with ID: {SessionId}", sessionId);
             }
 
             Response.Cookies.Delete("X-Session-Id");
@@ -246,7 +247,6 @@ namespace kAI_webAPI.Controllers
                 status = "Success",
                 message = "Successfully Log Out."
             });
-
         }
         [HttpPost("renew-token")]
         public async Task<IActionResult> RenewToken([FromBody] TokenModel tokenModel)
