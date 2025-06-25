@@ -28,12 +28,12 @@ namespace kAI_webAPI.Mappers
             // Fix: Map Password to Password_hash since User does not have a Password property
             return new User
             {
-                username = userDto.Username,
-                password_hash = userDto.Password, // Corrected mapping
-                fullname = userDto.Fullname,
-                email = userDto.Email,
-                phone = userDto.Phone,
-                address = userDto.Address
+                username = userDto.username,
+                password_hash = userDto.password, // Corrected mapping
+                fullname = userDto.fullname,
+                email = userDto.email,
+                phone = userDto.phone,
+                address = userDto.address
             };
         }
     }

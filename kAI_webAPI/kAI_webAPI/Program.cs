@@ -18,7 +18,7 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("https://api.kai.tapoletran.vn"); 
+//builder.WebHost.UseUrls("https://api.kai.tapoletran.vn"); 
 
 // Add services to the container.
 IConfiguration cf = new ConfigurationBuilder()

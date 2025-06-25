@@ -63,7 +63,7 @@ namespace kAI_webAPI.Controllers
                     new Claim("Address", userDto.address ?? string.Empty),
                     new Claim(JwtRegisteredClaimNames.Jti, jti) // Thêm dòng này
                 }),
-                Expires = DateTime.UtcNow.AddSeconds(10), // Token expires in 7 days
+                Expires = DateTime.UtcNow.AddDays(7), // Token expires in 7 days
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), 
                 SecurityAlgorithms.HmacSha256Signature)
             };
@@ -79,7 +79,7 @@ namespace kAI_webAPI.Controllers
                 IsUsed = false,
                 IsRevoked = false,
                 IssuedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddDays(7), // Refresh token expires in 30 days
+                ExpiredAt = DateTime.UtcNow.AddDays(30), // Refresh token expires in 30 days
             };
             await _context.AddAsync(refreshTokenEntity);
             await _context.SaveChangesAsync();

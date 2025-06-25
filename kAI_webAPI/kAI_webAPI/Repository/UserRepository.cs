@@ -126,29 +126,32 @@ namespace kAI_webAPI.Repository
             return userModel;
         }
 
+
+
         public async Task<User?> UpdateUserSync(int id_user, UpdateUserRequestDto updateDto)
         {
-            var userModel = await _context.Users.FirstOrDefaultAsync(u => u.id_users == id_user);
-            if (userModel == null)
-            {
-                return null;
-            }
-            userModel.username = updateDto.username;
+            var user = await _context.Users.FindAsync(id_user);
+            if (user == null) return null;
 
-            // Sử dụng service băm mật khẩu
+            if (updateDto.username != null)
+                user.username = updateDto.username;
+            if (updateDto.fullname != null)
+                user.fullname = updateDto.fullname;
+            if (updateDto.email != null)
+                user.email = updateDto.email;
+            if (updateDto.phone != null)
+                user.phone = updateDto.phone;
+            if (updateDto.address != null)
+                user.address = updateDto.address;
             if (!string.IsNullOrEmpty(updateDto.password))
             {
                 var (hash, salt) = _hasher.HashPassword(updateDto.password);
-                userModel.password_hash = hash;
-                userModel.password_salt = salt;
+                user.password_hash = hash;
+                user.password_salt = salt;
             }
 
-            userModel.fullname = updateDto.fullname;
-            userModel.email = updateDto.email;
-            userModel.phone = updateDto.phone;
-            userModel.address = updateDto.address;
             await _context.SaveChangesAsync();
-            return userModel;
+            return user;
         }
     }
 }
