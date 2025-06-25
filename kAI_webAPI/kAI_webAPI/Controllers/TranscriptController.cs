@@ -88,7 +88,7 @@ namespace kAI_webAPI.Controllers
 
             return Ok("Transcript remark added successfully.");
         }
-        [HttpGet("user")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetUserTranscripts()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

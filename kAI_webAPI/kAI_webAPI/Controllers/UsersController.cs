@@ -122,7 +122,7 @@ namespace kAI_webAPI.Controllers
             await _userRepo.AddUserSync(userModel);
             return Ok("User created successfully.");
         }
-        [HttpPost("Login")]
+        [HttpPost("login")]
         public async Task<IActionResult> DangNhap([FromBody] UserLoginDto userLoginDto)
         {
             if (userLoginDto == null)
@@ -201,7 +201,7 @@ namespace kAI_webAPI.Controllers
             var userDto = user.ToUserDto();
             return Ok(userDto);
         }
-        [HttpPost("Logout")]
+        [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
@@ -221,7 +221,7 @@ namespace kAI_webAPI.Controllers
             });
 
         }
-        [HttpPost("RenewToken")]
+        [HttpPost("renew-token")]
         public async Task<IActionResult> RenewToken([FromBody] TokenModel tokenModel)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
