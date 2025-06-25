@@ -24,7 +24,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace kAI_webAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -102,7 +102,6 @@ namespace kAI_webAPI.Controllers
         }
 
         [HttpPost]
-        [Route("/Users/Create")]
         public async Task<IActionResult> ThemUser([FromBody] UserRegisterDto userDto) // Dùng [FromBody] để nhận dữ liệu từ body của request
         {
             if (userDto == null)
@@ -159,16 +158,14 @@ namespace kAI_webAPI.Controllers
                 Data = token
             });
         }
-        [HttpPut]
-        [Route("/Users/Update/{id_user:int}")]
+        [HttpPut("{id_user:int}")]
         public async Task<IActionResult> CapnhatUser([FromRoute] int id_user, [FromBody] UpdateUserRequestDto updateDto)
         {
             await _userRepo.UpdateUserSync(id_user, updateDto);
             return Ok("User updated successfully.");
         }
 
-        [HttpPost]
-        [Route("/Users/Delete")]
+        [HttpDelete("{id_user:int}")]
         public async Task<IActionResult> XoaUser(int id_user)
         {
             if (id_user <= 0)
@@ -179,7 +176,6 @@ namespace kAI_webAPI.Controllers
             return Ok("User deleted successfully.");
         }
         [HttpGet]
-        [Route("/Users/GetAll")]
         public async Task<IActionResult> LayTatCaUsers([FromQuery] QueryObject query)
         {
             var users = await _userRepo.GetAllUserSync(query);
@@ -190,8 +186,7 @@ namespace kAI_webAPI.Controllers
             var userDtos = users.Select(s => s.ToUserDto());
             return Ok(userDtos);
         }
-        [HttpGet]
-        [Route("/Users/GetById/{id_user:int}")]
+        [HttpGet("{id_user:int}")]
         public async Task<IActionResult> LayUserbyId_User(int id_user)
         {
             if (id_user <= 0)

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace kAI_webAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/subjects")]
     public class SubjectsController : ControllerBase
     {
         private readonly ApplicationDBContext _context;

@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 namespace kAI_webAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/transcripts")]
     [ApiController]
     //[Authorize(Roles = "Admin, User")] // Phân quyền có thể tùy chỉnh nếu cần
     [Authorize] // Chỉ cần xác thực người dùng, không cần phân quyền cụ thể
@@ -56,7 +56,7 @@ namespace kAI_webAPI.Controllers
             await _transciptRepo.AddTranscriptAsync(transcript);
             return Ok("Lưu transcript thành công.");
         }
-        [HttpPost("CreateTranscriptRemark")]
+        [HttpPost("{id_transcript:int}/remarks")]
         public async Task<IActionResult> CreateTranscriptRemark([FromBody] CreateTranscriptRemarkDto createTranscriptRemarkDto)
         {
             if (createTranscriptRemarkDto == null)
@@ -88,7 +88,7 @@ namespace kAI_webAPI.Controllers
 
             return Ok("Transcript remark added successfully.");
         }
-        [HttpGet("GetUserTranscripts")]
+        [HttpGet("user")]
         public async Task<IActionResult> GetUserTranscripts()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -104,7 +104,7 @@ namespace kAI_webAPI.Controllers
 
             return Ok(transcripts);
         }
-        [HttpGet("GetTranscriptRemarks/{transcriptId}")]
+        [HttpGet("{transcriptId:int}/remarks")]
         public async Task<IActionResult> GetTranscriptRemarks(int transcriptId)
         {
             var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);

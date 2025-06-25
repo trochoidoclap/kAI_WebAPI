@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using System.ComponentModel.DataAnnotations;
 namespace kAI_webAPI.Controllers
 {
+    [Route("api/questions")]
     public class QuestionsController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
@@ -22,7 +23,6 @@ namespace kAI_webAPI.Controllers
             _questionsRepo = questionsRepo;
         }
         [HttpGet]
-        [Route("/Questions/GetAllQuestions")]
         public async Task<IActionResult> GetAllQuestions()
         {
             var questions = await _questionsRepo.GetAllQuestionsAsync();
