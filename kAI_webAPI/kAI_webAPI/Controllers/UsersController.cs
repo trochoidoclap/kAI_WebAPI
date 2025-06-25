@@ -55,12 +55,12 @@ namespace kAI_webAPI.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, userDto.Id_users.ToString()),
-                    new Claim(ClaimTypes.Name, userDto.Username),
-                    new Claim(ClaimTypes.Email, userDto.Email ?? string.Empty),
-                    new Claim("Fullname", userDto.Fullname ?? string.Empty),
-                    new Claim("Phone", userDto.Phone.ToString()),
-                    new Claim("Address", userDto.Address ?? string.Empty),
+                    new Claim(ClaimTypes.NameIdentifier, userDto.id_users.ToString()),
+                    new Claim(ClaimTypes.Name, userDto.username),
+                    new Claim(ClaimTypes.Email, userDto.email ?? string.Empty),
+                    new Claim("Fullname", userDto.fullname ?? string.Empty),
+                    new Claim("Phone", userDto.phone.ToString()),
+                    new Claim("Address", userDto.address ?? string.Empty),
                     new Claim(JwtRegisteredClaimNames.Jti, jti) // Thêm dòng này
                 }),
                 Expires = DateTime.UtcNow.AddSeconds(10), // Token expires in 7 days
@@ -73,7 +73,7 @@ namespace kAI_webAPI.Controllers
             var refreshTokenEntity = new RefreshToken
             {
                 Id = Guid.NewGuid(),
-                Id_users = userDto.Id_users,
+                Id_users = userDto.id_users,
                 Token = refreshToken,
                 JwtId = jti,
                 IsUsed = false,
@@ -110,16 +110,16 @@ namespace kAI_webAPI.Controllers
                 return BadRequest("Invalid user data.");
             }
             // Kiểm tra các trường bắt buộc
-            if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password) || string.IsNullOrEmpty(userDto.Fullname))
+            if (string.IsNullOrEmpty(userDto.username) || string.IsNullOrEmpty(userDto.password) || string.IsNullOrEmpty(userDto.fullname))
             {
                 return BadRequest("Username, Password, and Fullname are required.");
             }
             var userModel = userDto.ToUserFromCreateDto();
 
             // Fix: Ensure the UserRegisterDto contains a Password property, as the User model does not have one.
-            var (hash, salt) = _hasher.HashPassword(userDto.Password); // Use userDto.Password instead of userModel.Password
-            userModel.Password_hash = hash; // Lưu trữ mật khẩu đã được băm
-            userModel.Password_salt = salt; // Lưu trữ muối để băm mật khẩu
+            var (hash, salt) = _hasher.HashPassword(userDto.password); // Use userDto.Password instead of userModel.Password
+            userModel.password_hash = hash; // Lưu trữ mật khẩu đã được băm
+            userModel.password_salt = salt; // Lưu trữ muối để băm mật khẩu
             await _userRepo.AddUserSync(userModel);
             return Ok("User created successfully.");
         }
@@ -131,7 +131,7 @@ namespace kAI_webAPI.Controllers
                 return BadRequest("Invalid login data.");
             }
             // Kiểm tra các trường bắt buộc
-            if (string.IsNullOrEmpty(userLoginDto.Username) || string.IsNullOrEmpty(userLoginDto.Password))
+            if (string.IsNullOrEmpty(userLoginDto.username) || string.IsNullOrEmpty(userLoginDto.password))
             {
                 return BadRequest("Username and Password are required.");
             }
@@ -141,11 +141,11 @@ namespace kAI_webAPI.Controllers
                 return Unauthorized("Invalid username or password.");
             }
             // Debug: kiểm tra giá trị hash/salt
-            if (string.IsNullOrEmpty(user.Password_hash) || string.IsNullOrEmpty(user.Password_salt))
+            if (string.IsNullOrEmpty(user.password_hash) || string.IsNullOrEmpty(user.password_salt))
             {
                 return StatusCode(500, "Hash hoặc salt bị thiếu trong DB.");
             }
-            if (!_hasher.Verify(userLoginDto.Password, user.Password_hash, user.Password_salt))
+            if (!_hasher.Verify(userLoginDto.password, user.password_hash, user.password_salt))
             {
                 return Unauthorized("Invalid username or password.");
             }

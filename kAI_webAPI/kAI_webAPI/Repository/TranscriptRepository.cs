@@ -34,14 +34,14 @@ namespace kAI_webAPI.Repository
         public async Task<List<GetTranscriptsDto>?> GetTranscriptsByUserId(int userId)
         {
             var transcripts = await _context.Transcript
-                .Where(t => t.Id_user == userId)
-                .OrderByDescending(t => t.Date)
+                .Where(t => t.id_user == userId)
+                .OrderByDescending(t => t.date)
                 .Select(t => new GetTranscriptsDto
                 {
-                    Id_transcript = t.Id_transcript,
-                    Date = t.Date,
-                    Content = t.Content,
-                    Rating = t.Rating
+                    id_transcript = t.id_transcript,
+                    date = t.date,
+                    content = t.content,
+                    rating = t.rating
                 })
                 .ToListAsync();
 
@@ -51,7 +51,7 @@ namespace kAI_webAPI.Repository
         public async Task<List<Remark?>> GetTranscriptRemarksById(int id)
         {
             return await _context.Remark
-                .Where(r => r.Id_transcript == id)
+                .Where(r => r.id_transcript == id)
                 .Select(r => (Remark?)r) // Ensure nullability matches the interface
                 .ToListAsync();
         }

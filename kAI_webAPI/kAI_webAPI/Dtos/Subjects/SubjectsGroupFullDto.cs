@@ -2,12 +2,12 @@
 {
     public class SubjectsGroupFullDto
     {
-        public int Id_subgroup { get; set; }
-        public SubjectsDto Subject1 { get; set; } = new SubjectsDto();
-        public SubjectsDto Subject2 { get; set; } = new SubjectsDto();
-        public SubjectsDto Subject3 { get; set; } = new SubjectsDto();
-        public SubjectsDto? Subject4 { get; set; } = null;
-        public SubjectsDto? Subject5 { get; set; } = null;
+        public int id_subgroup { get; set; }
+        public SubjectsDto subject1 { get; set; } = new SubjectsDto();
+        public SubjectsDto subject2 { get; set; } = new SubjectsDto();
+        public SubjectsDto subject3 { get; set; } = new SubjectsDto();
+        public SubjectsDto? subject4 { get; set; } = null;
+        public SubjectsDto? subject5 { get; set; } = null;
 
     }
 }

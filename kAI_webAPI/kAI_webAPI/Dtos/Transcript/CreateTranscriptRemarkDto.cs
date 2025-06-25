@@ -2,9 +2,9 @@
 {
     public class CreateTranscriptRemarkDto
     {
-        public int Id_transcript { get; set; }
-        public int Id_user { get; set; }
-        public string Text { get; set; } = string.Empty;
-        public string Choose { get; set; } = string.Empty;
+        public int id_transcript { get; set; }
+        public int id_user { get; set; }
+        public string text { get; set; } = string.Empty;
+        public string choose { get; set; } = string.Empty;
     }
 }

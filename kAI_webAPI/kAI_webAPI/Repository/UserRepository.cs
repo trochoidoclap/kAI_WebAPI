@@ -41,14 +41,14 @@ namespace kAI_webAPI.Repository
         }
 
         public Task<User?> GetByUsernameAsync(string username) =>
-            _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+            _context.Users.SingleOrDefaultAsync(u => u.username == username);
 
         public Task SaveChangesAsync() => _context.SaveChangesAsync();
 
         public async Task<User?> LoginUserSync(UserLoginDto userLoginDto)
         {
             // Chỉ lấy user theo username, KHÔNG kiểm tra password ở đây
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == userLoginDto.Username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.username == userLoginDto.username);
         }
 
         private bool VerifyPassword(string password, string storedHash, string storedSalt)
@@ -62,7 +62,7 @@ namespace kAI_webAPI.Repository
 
         public async Task<User?> DeleteUserSync(int id_user)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id_users == id_user);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.id_users == id_user);
             if (user == null)
             {
                 return null;
@@ -77,36 +77,36 @@ namespace kAI_webAPI.Repository
             var users = _context.Users.AsQueryable();
             if (!string.IsNullOrEmpty(query.Username))
             {
-                users = users.Where(u => u.Username.ToLower().Contains(query.Username.ToLower()));
+                users = users.Where(u => u.username.ToLower().Contains(query.Username.ToLower()));
             }
             if (!string.IsNullOrEmpty(query.Fullname))
             {
-                users = users.Where(u => u.Fullname.ToLower().Contains(query.Fullname.ToLower()));
+                users = users.Where(u => u.fullname.ToLower().Contains(query.Fullname.ToLower()));
             }
             if (!string.IsNullOrEmpty(query.Email))
             {
-                users = users.Where(u => u.Email.ToLower().Contains(query.Email.ToLower()));
+                users = users.Where(u => u.email.ToLower().Contains(query.Email.ToLower()));
             }
             if (!string.IsNullOrEmpty(query.Phone))
             {
-                users = users.Where(u => u.Phone.Contains(query.Phone));
+                users = users.Where(u => u.phone.Contains(query.Phone));
             }
             if (!string.IsNullOrEmpty(query.Address))
             {
-                users = users.Where(u => u.Address.ToLower().Contains(query.Address.ToLower()));
+                users = users.Where(u => u.address.ToLower().Contains(query.Address.ToLower()));
             }
             if (!string.IsNullOrEmpty(query.SortBy))
             {
                 switch (query.SortBy.ToLower())
                 {
                     case "username":
-                        users = query.IsDescending ? users.OrderByDescending(u => u.Username) : users.OrderBy(u => u.Username);
+                        users = query.IsDescending ? users.OrderByDescending(u => u.username) : users.OrderBy(u => u.username);
                         break;
                     case "fullname":
-                        users = query.IsDescending ? users.OrderByDescending(u => u.Fullname) : users.OrderBy(u => u.Fullname);
+                        users = query.IsDescending ? users.OrderByDescending(u => u.fullname) : users.OrderBy(u => u.fullname);
                         break;
                     case "address":
-                        users = query.IsDescending ? users.OrderByDescending(u => u.Address) : users.OrderBy(u => u.Address);
+                        users = query.IsDescending ? users.OrderByDescending(u => u.address) : users.OrderBy(u => u.address);
                         break;
                     default:
                         break;
@@ -118,7 +118,7 @@ namespace kAI_webAPI.Repository
 
         public async Task<User?> GetUserByIdSync(int id_user)
         {
-            var userModel = await _context.Users.FirstOrDefaultAsync(u => u.Id_users == id_user);
+            var userModel = await _context.Users.FirstOrDefaultAsync(u => u.id_users == id_user);
             if (userModel == null)
             {
                 return null;
@@ -128,25 +128,25 @@ namespace kAI_webAPI.Repository
 
         public async Task<User?> UpdateUserSync(int id_user, UpdateUserRequestDto updateDto)
         {
-            var userModel = await _context.Users.FirstOrDefaultAsync(u => u.Id_users == id_user);
+            var userModel = await _context.Users.FirstOrDefaultAsync(u => u.id_users == id_user);
             if (userModel == null)
             {
                 return null;
             }
-            userModel.Username = updateDto.Username;
+            userModel.username = updateDto.username;
 
             // Sử dụng service băm mật khẩu
-            if (!string.IsNullOrEmpty(updateDto.Password))
+            if (!string.IsNullOrEmpty(updateDto.password))
             {
-                var (hash, salt) = _hasher.HashPassword(updateDto.Password);
-                userModel.Password_hash = hash;
-                userModel.Password_salt = salt;
+                var (hash, salt) = _hasher.HashPassword(updateDto.password);
+                userModel.password_hash = hash;
+                userModel.password_salt = salt;
             }
 
-            userModel.Fullname = updateDto.Fullname;
-            userModel.Email = updateDto.Email;
-            userModel.Phone = updateDto.Phone;
-            userModel.Address = updateDto.Address;
+            userModel.fullname = updateDto.fullname;
+            userModel.email = updateDto.email;
+            userModel.phone = updateDto.phone;
+            userModel.address = updateDto.address;
             await _context.SaveChangesAsync();
             return userModel;
         }

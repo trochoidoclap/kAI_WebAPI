@@ -6,11 +6,12 @@ namespace kAI_webAPI.Models.Question
     public class Question
     {
         [Key]
-        public int Id_question { get; set; }
-        public int Type { get; set; }
+        public int id_question { get; set; }
+        public int type { get; set; }
         [ForeignKey(nameof(Type))]
         public Questions_type? QuestionsType { get; set; }
-        public string Content { get; set; } = string.Empty;
-        public int Score { get; set; }
+        public string type_MBTI { get; set; } = string.Empty;
+        public string content { get; set; } = string.Empty;
+        public int score { get; set; }
     }
 }

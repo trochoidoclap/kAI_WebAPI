@@ -6,11 +6,11 @@ namespace kAI_webAPI.Models.Transcript
     public class Remark
     {
         [Key]
-        public int Id_remark { get; set; }
+        public int id_remark { get; set; }
         [ForeignKey(nameof(Transcript))]
-        public int Id_transcript { get; set; }
+        public int id_transcript { get; set; }
         public Transcript Transcript { get; set; } = null!;
-        public string Text { get; set; } = string.Empty;
-        public string Choose { get; set; } = string.Empty;
+        public string text { get; set; } = string.Empty;
+        public string choose { get; set; } = string.Empty;
     }
 }

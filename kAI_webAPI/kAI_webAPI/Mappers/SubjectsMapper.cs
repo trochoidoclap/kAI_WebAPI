@@ -9,8 +9,8 @@ namespace kAI_webAPI.Mappers
         {
             return new SubjectsDto
             {
-                Subject_name = subject.subject_name,
-                Type = subject.Type
+                subject_name = subject.subject_name,
+                type = subject.type
             };
         }
     }

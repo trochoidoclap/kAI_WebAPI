@@ -7,17 +7,17 @@ namespace kAI_webAPI.Dtos.User
 {
     public class UserDto
     {
-        public int Id_users { get; set; }
+        public int id_users { get; set; }
         [Required(ErrorMessage = "Username is required.")]
-        public string Username { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
         //public string Password { get; set; } = string.Empty; // Password không cần thiết trong DTO trả về
         //[StringLength(50)] không cần thiết trong DTO trả về
         [Required(ErrorMessage = "Fullname is required.")]
-        public string Fullname { get; set; } = string.Empty;
+        public string fullname { get; set; } = string.Empty;
         [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string Email { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
         [Phone(ErrorMessage = "Invalid phone number format.")]
-        public string Phone { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
+        public string phone { get; set; } = string.Empty;
+        public string address { get; set; } = string.Empty;
     }
 }

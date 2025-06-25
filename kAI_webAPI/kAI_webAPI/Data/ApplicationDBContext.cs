@@ -30,34 +30,34 @@ namespace kAI_webAPI.Data
             builder.Entity<Subjects>(entity =>
             {
                 entity.ToTable("subjects");
-                entity.HasKey(e => e.Id_subjects);
+                entity.HasKey(e => e.id_subjects);
                 entity.Property(e => e.subject_name).HasColumnName("subject");
-                entity.Property(e => e.Type).HasColumnName("type");
+                entity.Property(e => e.type).HasColumnName("type");
             });
             builder.Entity<SubjectsGroup>(entity =>
             {
                 entity.ToTable("subjects_group");
-                entity.HasKey(e => e.Id_subgroup);
+                entity.HasKey(e => e.id_subgroup);
 
-                entity.HasOne(sg => sg.Subject1Navigation)
+                entity.HasOne(sg => sg.subject1Navigation)
                 .WithMany()
-                .HasForeignKey(sg => sg.Subject1)
+                .HasForeignKey(sg => sg.subject1)
                 .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(sg => sg.Subject2Navigation)
+                entity.HasOne(sg => sg.subject2Navigation)
                 .WithMany()
-                .HasForeignKey(sg => sg.Subject2)
+                .HasForeignKey(sg => sg.subject2)
                 .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(sg => sg.Subject3Navigation)
+                entity.HasOne(sg => sg.subject3Navigation)
                 .WithMany()
-                .HasForeignKey(sg => sg.Subject3)
+                .HasForeignKey(sg => sg.subject3)
                 .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(sg => sg.Subject4Navigation)
+                entity.HasOne(sg => sg.subject4Navigation)
                 .WithMany()
-                .HasForeignKey(sg => sg.Subject4)
+                .HasForeignKey(sg => sg.subject4)
                 .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(sg => sg.Subject5Navigation)
+                entity.HasOne(sg => sg.subject5Navigation)
                 .WithMany()
-                .HasForeignKey(sg => sg.Subject5)
+                .HasForeignKey(sg => sg.subject5)
                 .OnDelete(DeleteBehavior.Restrict);
             });
         }

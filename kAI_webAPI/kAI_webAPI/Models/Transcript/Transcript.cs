@@ -5,14 +5,14 @@ namespace kAI_webAPI.Models.Transcript
     public class Transcript
     {
         [Key]
-        public int Id_transcript { get; set; }
-        public int Id_user { get; set; }
-        [ForeignKey("Id_user")]
-        public User.User? User { get; set; } = null;
-        public DateTime Date { get; set; } = DateTime.Now;
-        public string Content { get; set; } = string.Empty;
+        public int id_transcript { get; set; }
+        public int id_user { get; set; }
+        [ForeignKey("id_user")]
+        public User.User? user { get; set; } = null;
+        public DateTime date { get; set; } = DateTime.Now;
+        public string content { get; set; } = string.Empty;
         [StringLength(4)]
-        public string Rating { get; set; } = string.Empty;
+        public string rating { get; set; } = string.Empty;
 
     }
 }

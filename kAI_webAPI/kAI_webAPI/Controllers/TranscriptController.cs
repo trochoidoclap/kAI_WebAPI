@@ -32,7 +32,7 @@ namespace kAI_webAPI.Controllers
             if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
                 return BadRequest("Invalid user ID.");
 
-            var ratings = createTranscriptDto.Ratings;
+            var ratings = createTranscriptDto.ratings;
             if (ratings.Count != 25)
                 return BadRequest("Phải có đúng 25 giá trị rating (1–5).");
 
@@ -47,10 +47,10 @@ namespace kAI_webAPI.Controllers
 
             var transcript = new Transcript
             {
-                Id_user = userId,
-                Date = DateTime.UtcNow,
-                Content = sbContent.ToString(),
-                Rating = "MBTI"
+                id_user = userId,
+                date = DateTime.UtcNow,
+                content = sbContent.ToString(),
+                rating = "MBTI"
             };
 
             await _transciptRepo.AddTranscriptAsync(transcript);
@@ -66,23 +66,23 @@ namespace kAI_webAPI.Controllers
             if (IdUserClaim == null || !int.TryParse(IdUserClaim.Value, out int userId))
                 return BadRequest("Invalid user ID.");
 
-            var Id_transcript = createTranscriptRemarkDto.Id_transcript;
+            var Id_transcript = createTranscriptRemarkDto.id_transcript;
             // Check if the transcript exists for the user
             var transcriptRemark = await _context.Transcript
-                .FirstOrDefaultAsync(t => t.Id_transcript == Id_transcript && t.Id_user == userId);
+                .FirstOrDefaultAsync(t => t.id_transcript == Id_transcript && t.id_user == userId);
             if (transcriptRemark == null)
                 return NotFound("Transcript not found for the user.");
 
             // Validate the remark text and choice
-            if (string.IsNullOrWhiteSpace(createTranscriptRemarkDto.Text) || string.IsNullOrWhiteSpace(createTranscriptRemarkDto.Choose))
+            if (string.IsNullOrWhiteSpace(createTranscriptRemarkDto.text) || string.IsNullOrWhiteSpace(createTranscriptRemarkDto.choose))
                 return BadRequest("Text and choice cannot be empty.");
 
             // Create a new Remark object and populate its properties
             var remark = new Remark
             {
-                Id_transcript = transcriptRemark.Id_transcript,
-                Text = createTranscriptRemarkDto.Text,
-                Choose = createTranscriptRemarkDto.Choose
+                id_transcript = transcriptRemark.id_transcript,
+                text = createTranscriptRemarkDto.text,
+                choose = createTranscriptRemarkDto.choose
             };
             await _transciptRepo.AddRemarkAsync(remark);
 

@@ -12,7 +12,7 @@ namespace kAI_webAPI.Mappers
         {
             return new GetQuestionsDto
             {
-                Content = questionModel.Content
+                Content = questionModel.content
             };
         }
     }

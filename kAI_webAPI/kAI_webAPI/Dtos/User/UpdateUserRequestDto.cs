@@ -6,11 +6,11 @@ namespace kAI_webAPI.Dtos.User
 {
     public class UpdateUserRequestDto
     {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string Fullname { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+        public string password { get; set; } = string.Empty;
+        public string fullname { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public string phone { get; set; } = string.Empty;
+        public string address { get; set; } = string.Empty;
     }
 }

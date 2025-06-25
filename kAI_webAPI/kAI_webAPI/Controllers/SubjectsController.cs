@@ -19,11 +19,11 @@ namespace kAI_webAPI.Controllers
         public IActionResult GetGroupWithSubjects()
         {
             var groups = _context.SubjectsGroups
-                .Include(g => g.Subject1Navigation)
-                .Include(g => g.Subject2Navigation)
-                .Include(g => g.Subject3Navigation)
-                .Include(g => g.Subject4Navigation)
-                .Include(g => g.Subject5Navigation)
+                .Include(g => g.subject1Navigation)
+                .Include(g => g.subject2Navigation)
+                .Include(g => g.subject3Navigation)
+                .Include(g => g.subject4Navigation)
+                .Include(g => g.subject5Navigation)
                 .ToList();
             var result = groups.Select(g => g.ToGroupFullDto()).ToList();
             return Ok(result);

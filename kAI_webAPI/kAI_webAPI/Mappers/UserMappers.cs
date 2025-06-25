@@ -15,12 +15,12 @@ namespace kAI_webAPI.Mappers
         {
             return new UserDto
             {
-                Id_users = userModel.Id_users,
-                Username = userModel.Username,
-                Fullname = userModel.Fullname,
-                Email = userModel.Email,
-                Phone = userModel.Phone,
-                Address = userModel.Address
+                id_users = userModel.id_users,
+                username = userModel.username,
+                fullname = userModel.fullname,
+                email = userModel.email,
+                phone = userModel.phone,
+                address = userModel.address
             };
         }
         public static User ToUserFromCreateDto(this UserRegisterDto userDto)
@@ -28,12 +28,12 @@ namespace kAI_webAPI.Mappers
             // Fix: Map Password to Password_hash since User does not have a Password property
             return new User
             {
-                Username = userDto.Username,
-                Password_hash = userDto.Password, // Corrected mapping
-                Fullname = userDto.Fullname,
-                Email = userDto.Email,
-                Phone = userDto.Phone,
-                Address = userDto.Address
+                username = userDto.Username,
+                password_hash = userDto.Password, // Corrected mapping
+                fullname = userDto.Fullname,
+                email = userDto.Email,
+                phone = userDto.Phone,
+                address = userDto.Address
             };
         }
     }

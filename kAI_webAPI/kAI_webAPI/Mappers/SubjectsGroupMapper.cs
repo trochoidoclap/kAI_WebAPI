@@ -9,12 +9,12 @@ namespace kAI_webAPI.Mappers
         {
             return new SubjectsGroupFullDto
             {
-                Id_subgroup = group.Id_subgroup,
-                Subject1 = group.Subject1Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
-                Subject2 = group.Subject2Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
-                Subject3 = group.Subject3Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
-                Subject4 = group.Subject4Navigation?.ToGetSubjectsDto(),
-                Subject5 = group.Subject5Navigation?.ToGetSubjectsDto()
+                id_subgroup = group.id_subgroup,
+                subject1 = group.subject1Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
+                subject2 = group.subject2Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
+                subject3 = group.subject3Navigation?.ToGetSubjectsDto() ?? new SubjectsDto(),
+                subject4 = group.subject4Navigation?.ToGetSubjectsDto(),
+                subject5 = group.subject5Navigation?.ToGetSubjectsDto()
             };
         }
     }
