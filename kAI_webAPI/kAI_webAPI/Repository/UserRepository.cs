@@ -112,6 +112,8 @@ namespace kAI_webAPI.Repository
                         break;
                 }
             }
+            query.PageNumber = Math.Max(query.PageNumber, 1); // Đảm bảo PageNumber >= 1
+            query.PageSize = Math.Max(query.PageSize, 1); // Đảm bảo PageSize >= 1
             var skipNumber = (query.PageNumber - 1) * query.PageSize;
             return await users.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }

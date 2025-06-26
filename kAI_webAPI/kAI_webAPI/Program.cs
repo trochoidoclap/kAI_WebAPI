@@ -17,7 +17,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.WebHost.UseUrls("https://api.kai.tapoletran.vn"); 
+//builder.WebHost.UseUrls("https://api.kai.tadpoletran.vn"); 
 
 // Add services to the container.
 IConfiguration cf = new ConfigurationBuilder()
@@ -77,6 +77,14 @@ builder.Services.AddScoped<ITranscriptRepository, TranscriptRepository>();
 
 builder.Services.Configure<AppSetting>(cf.GetSection("AppSettings"));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
 var secretKey = cf["AppSettings:SecretKey"];
 var secretKeyBytes = System.Text.Encoding.UTF8.GetBytes(secretKey ?? throw new InvalidOperationException("SecretKey is not configured."));
 
@@ -109,6 +117,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
