@@ -24,6 +24,18 @@ namespace kAI_webAPI.Controllers
             _context = context;
             _logger = logger;
         }
+
+        private int GetUserIdFromClaims()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                _logger.LogWarning("Invalid user ID claim at {Time}", DateTime.UtcNow);
+                throw new UnauthorizedAccessException("Invalid user ID.");
+            }
+            return userId;
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateTranscript([FromBody] CreateTranscriptDTOs createTranscriptDto)
         {
@@ -73,7 +85,7 @@ namespace kAI_webAPI.Controllers
             _logger.LogInformation("Transcript created successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok("Lưu transcript thành công.");
         }
-        [HttpPost("{id_transcript:int}/remarks")]
+        [HttpPost("remarks")]
         public async Task<IActionResult> CreateTranscriptRemark([FromBody] CreateTranscriptRemarkDto createTranscriptRemarkDto)
         {
             _logger.LogInformation("Creating a new transcript remark for user {UserId} at {Time}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value, DateTime.UtcNow);
@@ -89,24 +101,27 @@ namespace kAI_webAPI.Controllers
             var transcriptRemark = await _context.Transcript
                 .FirstOrDefaultAsync(t => t.id_transcript == Id_transcript && t.id_user == userId);
             if (transcriptRemark == null)
-                return NotFound("Transcript not found for the user.");
+            {
+                _logger.LogWarning("Transcript not found for user {UserId} at {Time}", userId, DateTime.UtcNow);
+                return NotFound($"Transcript not found for the user {userId}.");
+            }
 
             // Validate the remark text and choice
-            if (string.IsNullOrWhiteSpace(createTranscriptRemarkDto.text) || string.IsNullOrWhiteSpace(createTranscriptRemarkDto.choose))
+            if (string.IsNullOrWhiteSpace(createTranscriptRemarkDto.content) || string.IsNullOrWhiteSpace(createTranscriptRemarkDto.choose))
                 return BadRequest("Text and choice cannot be empty.");
 
             // Create a new Remark object and populate its properties
             var remark = new Remark
             {
                 id_transcript = transcriptRemark.id_transcript,
-                text = createTranscriptRemarkDto.text,
+                content = createTranscriptRemarkDto.content,
                 choose = createTranscriptRemarkDto.choose
             };
             await _transciptRepo.AddRemarkAsync(remark);
             _logger.LogInformation("Transcript remark created successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok("Transcript remark added successfully.");
         }
-        [HttpGet("{id:int}")]
+        [HttpGet]
         public async Task<IActionResult> GetUserTranscripts()
         {
             _logger.LogInformation("Retrieving transcripts for user {UserId} at {Time}", User.FindFirst(ClaimTypes.NameIdentifier)?.Value, DateTime.UtcNow);
@@ -123,8 +138,8 @@ namespace kAI_webAPI.Controllers
             _logger.LogInformation("Transcripts retrieved successfully for user {UserId} at {Time}", userId, DateTime.UtcNow);
             return Ok(transcripts);
         }
-        [HttpGet("{transcriptId:int}/remarks")]
-        public async Task<IActionResult> GetTranscriptRemarks(int transcriptId)
+        [HttpGet("remarks")]
+        public async Task<IActionResult> GetUserTranscriptRemarks(int transcriptId)
         {
             _logger.LogInformation("Retrieving remarks for transcript {TranscriptId} at {Time}", transcriptId, DateTime.UtcNow);
             var IdUserClaim = User.FindFirst(ClaimTypes.NameIdentifier);

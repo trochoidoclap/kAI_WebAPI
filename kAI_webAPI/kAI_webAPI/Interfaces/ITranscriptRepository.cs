@@ -11,6 +11,6 @@ namespace kAI_webAPI.Interfaces
         Task<Transcript?> AddTranscriptAsync(Transcript transcript);
         Task<List<GetTranscriptsDto>?> GetTranscriptsByUserId(int id);
         Task<Remark?> AddRemarkAsync(Remark remark);
-        Task<List<Remark?>> GetTranscriptRemarksById(int userId);
+        Task<List<Remark>?> GetTranscriptRemarksById(int userId);
     }
 }

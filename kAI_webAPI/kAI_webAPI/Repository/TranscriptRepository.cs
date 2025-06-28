@@ -48,12 +48,13 @@ namespace kAI_webAPI.Repository
             return transcripts.Count > 0 ? transcripts : null;
         }
 
-        public async Task<List<Remark?>> GetTranscriptRemarksById(int id)
+        public async Task<List<Remark>?> GetTranscriptRemarksById(int id)
         {
-            return await _context.Remark
-                .Where(r => r.id_transcript == id)
-                .Select(r => (Remark?)r) // Ensure nullability matches the interface
+            var remarks = await _context.Remark
+                .Where(r => r.Transcript.id_user == id)
+                .OrderByDescending(r => r.id_remark)
                 .ToListAsync();
+            return remarks.Count > 0 ? remarks : null;
         }
     }
 }

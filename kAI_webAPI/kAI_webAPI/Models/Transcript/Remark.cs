@@ -10,7 +10,7 @@ namespace kAI_webAPI.Models.Transcript
         [ForeignKey(nameof(Transcript))]
         public int id_transcript { get; set; }
         public Transcript Transcript { get; set; } = null!;
-        public string text { get; set; } = string.Empty;
+        public string content { get; set; } = string.Empty;
         public string choose { get; set; } = string.Empty;
     }
 }
